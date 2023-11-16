@@ -1,0 +1,300 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: TMY Globalization 1.8.8\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/tmy-globalization\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-10-20T23:34:12+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language: \n"
+"X-Generator: WP-CLI 2.7.1\n"
+"X-Domain: tmy-globalization\n"
+
+#. Plugin Name of the plugin
+#: admin/class-tmy-g11n-admin.php:165
+#: admin/class-tmy-g11n-admin.php:166
+msgid "TMY Globalization"
+msgstr "TMY国际化"
+
+#. Plugin URI of the plugin
+msgid "https://github.com/tmysoft/tmy-wordpress"
+msgstr ""
+
+#. Description of the plugin
+msgid "Translating your application into other languages."
+msgstr ""
+
+#. Author of the plugin
+msgid "Yu Shao"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://github.com/tmysoft"
+msgstr ""
+
+#: admin/class-tmy-g11n-admin.php:173
+#: admin/class-tmy-g11n-admin.php:174
+msgid "TMY Setup"
+msgstr "TMY 设置"
+
+#: admin/class-tmy-g11n-admin.php:182
+#: admin/class-tmy-g11n-admin.php:183
+#: admin/class-tmy-g11n-admin.php:378
+msgid "TMY Dashboard"
+msgstr "TMY 仪表盘"
+
+#: admin/class-tmy-g11n-admin.php:190
+#: admin/class-tmy-g11n-admin.php:191
+msgid "TMY Taxonomies"
+msgstr "TMY Taxonomy 翻译"
+
+#: admin/class-tmy-g11n-admin.php:198
+#: admin/class-tmy-g11n-admin.php:199
+msgid "TMY Text"
+msgstr "TMY 文本翻译"
+
+#: admin/class-tmy-g11n-admin.php:206
+#: admin/class-tmy-g11n-admin.php:207
+msgid "TMY Diagnosis"
+msgstr "TMY 问题诊断"
+
+#: admin/class-tmy-g11n-admin.php:219
+#: admin/class-tmy-g11n-admin.php:2477
+msgid "Translation Status"
+msgstr "翻译状态"
+
+#: admin/class-tmy-g11n-admin.php:254
+msgid "LIVE"
+msgstr "可用"
+
+#: admin/class-tmy-g11n-admin.php:261
+msgid "IN PROGRESS"
+msgstr "翻译中"
+
+#: admin/class-tmy-g11n-admin.php:270
+#: admin/class-tmy-g11n-admin.php:277
+msgid "DISABLED"
+msgstr "禁止"
+
+#. translators: %1$s is languge code
+#: admin/class-tmy-g11n-admin.php:302
+msgid "This is the %1$s translation page of <a href=\"%2$s\">%3$s (ID:%4$s)</a>"
+msgstr "这是文章 %1$s 语言的翻译: <a href=\"%2$s\">%3$s (ID:%4$s)</a>"
+
+#: admin/class-tmy-g11n-admin.php:330
+#: admin/class-tmy-g11n-admin.php:342
+msgid "Status"
+msgstr "状态"
+
+#: admin/class-tmy-g11n-admin.php:340
+#: admin/class-tmy-g11n-admin.php:2476
+msgid "Language"
+msgstr "语言"
+
+#: admin/class-tmy-g11n-admin.php:341
+msgid "Code"
+msgstr "代码"
+
+#: admin/class-tmy-g11n-admin.php:364
+msgid "Not Started Yet"
+msgstr "还没开始"
+
+#: admin/class-tmy-g11n-admin.php:372
+#: admin/class-tmy-g11n-admin.php:2575
+msgid "Start or Sync Translation"
+msgstr "开始或发送翻译"
+
+#: admin/class-tmy-g11n-admin.php:373
+msgid "Press to Start Translation Or Send To Translation Server"
+msgstr "按这个按钮可以开始翻译或把内容发送到翻译服务器"
+
+#: admin/class-tmy-g11n-admin.php:375
+msgid "Visit"
+msgstr "访问"
+
+#: admin/class-tmy-g11n-admin.php:376
+msgid "TMY Translations"
+msgstr "TMY 翻译仪表盘"
+
+#: admin/class-tmy-g11n-admin.php:376
+msgid "for all translations"
+msgstr "所有的翻译"
+
+#: admin/class-tmy-g11n-admin.php:377
+msgid "Or, visit"
+msgstr "或者,访问"
+
+#: admin/class-tmy-g11n-admin.php:378
+msgid "for translation summary"
+msgstr "翻译汇总"
+
+#: admin/class-tmy-g11n-admin.php:381
+msgid "Latest status with Translation Server:"
+msgstr "翻译服务器的最新状态:"
+
+#: admin/class-tmy-g11n-admin.php:391
+msgid "Translation Status:"
+msgstr "翻译状态:"
+
+#: admin/class-tmy-g11n-admin.php:554
+msgid "Globalization Options"
+msgstr "国际化选项"
+
+#: admin/class-tmy-g11n-admin.php:565
+msgid "Default Language"
+msgstr "默认语言"
+
+#: admin/class-tmy-g11n-admin.php:587
+msgid "All Enabled Languages"
+msgstr "所有语言"
+
+#: admin/class-tmy-g11n-admin.php:675
+msgid "Live Translation powered by Google Translate"
+msgstr "实时翻译-使用谷歌翻译"
+
+#: admin/class-tmy-g11n-admin.php:702
+msgid ""
+"Language Switchers could be added to different locations via widget \"TMY Language Switcher Widget\" from \"Appearance-> Widgets\",<br>\n"
+"                                                         or Gutenberg block(block) titled \"TMY Language Switcher Block\". "
+msgstr "语言选择器可以通过\"Appearance-> Widgets\"选择TMY Language Switcher Widget 或在Gutenberg Block里的TMY Language Switcher Block安装在网站不同的位置"
+
+#: admin/class-tmy-g11n-admin.php:709
+msgid "Get Visitor Language Preference From"
+msgstr "使用用户浏览器语言设置"
+
+#: admin/class-tmy-g11n-admin.php:717
+msgid "Translation Server(Optional)"
+msgstr "翻译服务器设置(非强制)"
+
+#: admin/class-tmy-g11n-admin.php:2700
+msgid "Add to menu"
+msgstr "加到菜单"
+
+#: admin/class-tmy-g11n-admin.php:772
+msgid "Enable Translation On"
+msgstr "开启以下翻译"
+
+#: admin/class-tmy-g11n-admin.php:798
+msgid "Taxonomy Translation Option"
+msgstr "Taxonomy翻译选项"
+
+#: admin/class-tmy-g11n-admin.php:695
+msgid "Language Switcher Location"
+msgstr "语言选择器位置"
+
+#: admin/class-tmy-g11n-admin.php:832
+msgid "Language Switcher Type"
+msgstr "语言选择器类型"
+
+#: admin/class-tmy-g11n-admin.php:836
+#: admin/include/class-tmy-g11n-table.php:208
+msgid "Text"
+msgstr "文字"
+
+#: admin/class-tmy-g11n-admin.php:837
+msgid "Flag"
+msgstr "国旗"
+
+#: admin/class-tmy-g11n-admin.php:852
+msgid "Use Classic Editor"
+msgstr "使用传统编辑器"
+
+#: admin/class-tmy-g11n-admin.php:860
+msgid "Auto Push/Pull Translation"
+msgstr "自动推送或者下载翻译"
+
+#: admin/class-tmy-g11n-admin.php:867
+msgid "Translation Resource File Directory"
+msgstr "翻译资源文件位置"
+
+#: admin/class-tmy-g11n-admin.php:873
+msgid "Theme Translation Files"
+msgstr "主题包的翻译文件位置"
+
+#: admin/class-tmy-g11n-admin.php:887
+msgid "Search Engine Optimization(SEO) URL"
+msgstr "使用搜索引擎优化URL"
+
+#: admin/class-tmy-g11n-admin.php:1293
+msgid "Globalization Dashboard"
+msgstr "国际化仪表盘"
+
+#: admin/class-tmy-g11n-admin.php:1319
+#: admin/class-tmy-g11n-admin.php:2478
+msgid "Translation Server Status"
+msgstr "翻译服务器状态"
+
+#: admin/class-tmy-g11n-admin.php:1322
+msgid "Translation server is not in use, configure the Translation Server(Optional) section in the setup page to start<br>"
+msgstr "翻译服务器还没有配置,请配置"
+
+#: admin/class-tmy-g11n-admin.php:1030
+msgid "Globalization Text Translation Manager"
+msgstr "国际化文本翻译器"
+
+#: admin/class-tmy-g11n-admin.php:1058
+msgid "Globalization Taxonomy Translation Manager"
+msgstr "国际化Taxonomy翻译器"
+
+#: admin/class-tmy-g11n-admin.php:1373
+msgid "Globalization Diagnosis"
+msgstr "国际化问题诊断"
+
+#: admin/class-tmy-g11n-admin.php:1374
+msgid ""
+"This Diagnosis tool provides advanced system information on how your site is running and collects the following information:<br><br>\n"
+"                 - Base system(phpinfo)<br>\n"
+"                 - TMYSoft plugin version<br>\n"
+"                 - Default theme<br>\n"
+"                 - Some system options that can impact how the plugin may be functioning<br><br>\n"
+"                 If you need further assistance to trouble shoot your site, please review the below diagnostic information to ensure there is no sensitive information included, click copy and email it to <a href=\"mailto:yu.shao.gm@gmail.com\">yu.shao.gm@gmail.com</a> in email."
+msgstr "如果你需要帮助,请检查以下信息是否包含敏感信息,然后把信息发给<a href=\"mailto:yu.shao.gm@gmail.com\">yu.shao.gm@gmail.com</a>"
+
+#: admin/class-tmy-g11n-admin.php:1382
+msgid "Copy Text"
+msgstr "拷贝信息"
+
+#: admin/class-tmy-g11n-admin.php:2473
+msgid "ID"
+msgstr ""
+
+#: admin/class-tmy-g11n-admin.php:2474
+msgid "Type"
+msgstr "类别"
+
+#: admin/class-tmy-g11n-admin.php:2475
+msgid "Original Post ID"
+msgstr "原始ID"
+
+#: admin/class-tmy-g11n-admin.php:2479
+msgid "Date"
+msgstr "日期"
+
+#: admin/include/class-tmy-g11n-table.php:26
+msgid "Term ID"
+msgstr ""
+
+#: admin/include/class-tmy-g11n-table.php:27
+msgid "Name"
+msgstr "名称"
+
+#: admin/include/class-tmy-g11n-table.php:28
+msgid "Slug"
+msgstr ""
+
+#: admin/include/class-tmy-g11n-table.php:29
+#: admin/include/class-tmy-g11n-table.php:209
+msgid "Taxonomy"
+msgstr ""
+
+#: admin/include/class-tmy-g11n-table.php:30
+#: admin/include/class-tmy-g11n-table.php:211
+msgid "Translations"
+msgstr "现有翻译"
+
+#: admin/include/class-tmy-g11n-table.php:210
+msgid "Translation Place Holder ID"
+msgstr "翻译内容ID"
