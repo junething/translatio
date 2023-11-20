@@ -1137,13 +1137,13 @@ public function g11n_add_floating_menu() {
 	public function tmy_g11n_blocks_init() {
 
             wp_enqueue_script(
-              'tmy-lang-block',
+              'translatio-lang-block',
               plugin_dir_url(__DIR__) . 'includes/tmy-block-language-switcher.js',
               array('wp-blocks','wp-editor','wp-server-side-render'),
               true
             );
 
-            $return = register_block_type('tmy/tmy-chooser-box', array(
+            $return = register_block_type('translatio/translatio-chooser-box', array(
                     'render_callback' => array($this,'tmy_lang_switcher_block_dynamic_render_cb')
             ));
 

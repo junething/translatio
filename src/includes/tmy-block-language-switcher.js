@@ -1,7 +1,7 @@
 /* This section of the code registers a new block, sets an icon and a category, and indicates what type of fields it'll include. */
   
-wp.blocks.registerBlockType('tmy/tmy-chooser-box', {
-  title: 'TMY Language Switcher Block',
+wp.blocks.registerBlockType('translatio/translatio-chooser-box', {
+  title: 'Translatio Language Switcher Block',
   icon: 'translation',
   category: 'common',
   attributes: {
@@ -15,14 +15,14 @@ wp.blocks.registerBlockType('tmy/tmy-chooser-box', {
     return React.createElement(
       "div",
       { style: { border: "2px solid #00a6d3" } },
-      "TMY Language Switcher Block",
+      "Translatio Language Switcher Block",
     );
   },
   save: function(props) {
     return wp.element.createElement(
       "div",
       { style: { border: "2px solid #00a6d3" } },
-      "TMY Language Switcher Block"
+      "Translatio Language Switcher Block"
     );
   }
 })

@@ -4,7 +4,7 @@ Link: https://www.translatio.io/
 Tags: translation, localization, multilingual, language, woocommerce
 Requires at least: 5.0
 Tested up to: 6.0.2
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -78,6 +78,9 @@ On CentOS/Feodra Linux system, the error is mostly due to the SE Linux setting w
 12. Globalization Switcher Widget
 
 == Changelog ==
+
+= 1.9.3 =
+* Translatio widget/block/menu update
 
 = 1.9.2 =
 * update some urls to translatio.io

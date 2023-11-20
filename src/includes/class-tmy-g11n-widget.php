@@ -8,7 +8,7 @@ class G11n_Language_Widget extends WP_Widget {
 
     public function __construct()
                 {                      // id_base        ,  visible name
-                    parent::__construct( 'g11n_lang_wg', 'TMY Lanaguage Switcher Widget' );
+                    parent::__construct( 'g11n_lang_wg', 'Translatio Lanaguage Switcher Widget' );
          	    $this->translator = new TMY_G11n_Translator();
                 }
 
