@@ -486,8 +486,8 @@ public function g11n_add_floating_menu() {
                     }
 
                     echo '<br>Click <button type="button" onclick="create_sync_translation(' . esc_attr($post_id) . ', \'' . esc_attr($post_type) . '\')">Start or Sync Translation</button> to send this page to translation server';
-                    echo '<br>Visit <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=g11n_translation' . '">TMY Translations</a> page for all translations';
-                    echo '<br>Or, visit <a href="' . get_home_url() . '/wp-admin/admin.php?page=tmy-g11n-dashboard-menu' . '">TMY Dashboard</a> for translation summary<br>';
+                    echo '<br>Visit <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=g11n_translation' . '">Translatio Translations</a> page for all translations';
+                    echo '<br>Or, visit <a href="' . get_home_url() . '/wp-admin/admin.php?page=tmy-g11n-dashboard-menu' . '">Translatio Dashboard</a> for translation summary<br>';
 
                     if ((strcmp('', get_option('g11n_server_user','')) !== 0) && (strcmp('', get_option('g11n_server_token','')) !== 0)) {
     		        echo '<br>Latest status with Translation Server:<div id="g11n_push_status_text_id"><h5>'. 
@@ -639,8 +639,8 @@ public function g11n_add_floating_menu() {
 		register_post_type( 'g11n_translation',
 		    array(
 		      'labels' => array(
-			'name' => __( 'TMY Translations', 'tmy-globalization' ),
-			'singular_name' => __( 'TMY Translation', 'tmy-globalization' )
+			'name' => __( 'Translatio Translations', 'tmy-globalization' ),
+			'singular_name' => __( 'Translatio Translation', 'tmy-globalization' )
 		      ),
 		      'public' => true,
 		      'show_ui' => true,

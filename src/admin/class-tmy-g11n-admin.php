@@ -162,16 +162,16 @@ class TMY_G11n_Admin {
                 $tmy_logo_svg = file_get_contents( plugin_dir_path( __FILE__ ) . 'include/tmy.svg', false);
                 $tmy_menu_icon = 'data:image/svg+xml;base64,' . base64_encode( $tmy_logo_svg );
 
-                add_menu_page( __( 'TMY Globalization', 'tmy-globalization'),
-                               __( 'TMY Globalization', 'tmy-globalization'),
+                add_menu_page( __( 'Translatio Globalization', 'tmy-globalization'),
+                               __( 'Translatio Globalization', 'tmy-globalization'),
                               'manage_options',
                               'tmy-g11n-main-menu',
                               false,
                               $tmy_menu_icon);
 
 		add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'TMY Setup', 'tmy-globalization'),
-                          	  __( 'TMY Setup', 'tmy-globalization'),
+                                  __( 'Translatio Setup', 'tmy-globalization'),
+                          	  __( 'Translatio Setup', 'tmy-globalization'),
                             	  'manage_options', 
                           	  'tmy-g11n-setup-menu', 
                           	  array( $this,
@@ -179,32 +179,32 @@ class TMY_G11n_Admin {
                                   1 );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'TMY Dashboard', 'tmy-globalization'),
-                          	  __( 'TMY Dashboard', 'tmy-globalization'),
+                                  __( 'Translatio Dashboard', 'tmy-globalization'),
+                          	  __( 'Translatio Dashboard', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-g11n-dashboard-menu',
                           	  array( $this,
                                          'tmy_l10n_manager_page') );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'TMY Taxonomies', 'tmy-globalization'),
-                          	  __( 'TMY Taxonomies', 'tmy-globalization'),
+                                  __( 'Translatio Taxonomies', 'tmy-globalization'),
+                          	  __( 'Translatio Taxonomies', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-g11n-taxonomy-menu',
                           	  array( $this,
                                          'tmy_l10n_taxonomy_page') );
 	
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'TMY Text', 'tmy-globalization'),
-                          	  __( 'TMY Text', 'tmy-globalization'),
+                                  __( 'Translatio Text', 'tmy-globalization'),
+                          	  __( 'Translatio Text', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-g11n-text-menu',
                           	  array( $this,
                                          'tmy_l10n_text_page') );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'TMY Diagnosis', 'tmy-globalization'),
-                          	  __( 'TMY Diagnosis', 'tmy-globalization'),
+                                  __( 'Translatio Diagnosis', 'tmy-globalization'),
+                          	  __( 'Translatio Diagnosis', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-support-manager',
                           	  array( $this,
@@ -373,9 +373,9 @@ class TMY_G11n_Admin {
                                                                             __('Press to Start Translation Or Send To Translation Server', 'tmy-globalization');
                 }
                 $return_msg .= '<br>' . __('Visit', 'tmy-globalization'). ' <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=g11n_translation' . 
-                               '">' . __('TMY Translations', 'tmy-globalization') . '</a> ' . __('for all translations', 'tmy-globalization');
+                               '">' . __('Translatio Translations', 'tmy-globalization') . '</a> ' . __('for all translations', 'tmy-globalization');
                 $return_msg .= '<br>' . __('Or, visit', 'tmy-globalization') .' <a href="' . get_home_url() . '/wp-admin/admin.php?page=tmy-g11n-dashboard-menu' . 
-                               '">' . __('TMY Dashboard', 'tmy-globalization') . '</a> ' . __('for translation summary', 'tmy-globalization') . '<br>';
+                               '">' . __('Translatio Dashboard', 'tmy-globalization') . '</a> ' . __('for translation summary', 'tmy-globalization') . '<br>';
 
                 if ((strcmp('', get_option('g11n_server_user','')) !== 0) && (strcmp('', get_option('g11n_server_token','')) !== 0)) {
     		    $return_msg .= '<br>' . __('Latest status with Translation Server:', 'tmy-globalization') . '<div id="g11n_push_status_text_id"><h5>'. 
@@ -699,8 +699,8 @@ class TMY_G11n_Admin {
             	<input type="checkbox" id="g11n_switcher_post" name="g11n_switcher_post" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_post')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> In Each Post <br>
             	<input type="checkbox" id="g11n_switcher_sidebar" name="g11n_switcher_sidebar" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_sidebar')), "Yes" ); ?><?php echo esc_attr($config_selected_disable); ?> /> Top of Sidebar <br>
             	<input type="checkbox" id="g11n_switcher_floating" name="g11n_switcher_floating" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_floating')), "Yes" ); ?> /> Draggable Floating Menu <br> <br>
-                <?php _e('Language Switchers could be added to different locations via widget "TMY Language Switcher Widget" from "Appearance-> Widgets",<br>
-                                                         or Gutenberg block(block) titled "TMY Language Switcher Block". ', 'tmy-globalization') ?>
+                <?php _e('Language Switchers could be added to different locations via widget "Translatio Language Switcher Widget" from "Appearance-> Widgets",<br>
+                                                         or Gutenberg block(block) titled "Translatio Language Switcher Block". ', 'tmy-globalization') ?>
  	    	</td>
                 </tr>
  
@@ -2568,7 +2568,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
             }
         }
         function tmy_plugin_g11n_edit_form_top() {
-            echo "TMY Glolbalization";
+            echo "Translatio Glolbalization";
         }
 
         function tmy_plugin_g11n_register_bulk_actions( $bulk_actions ) {
@@ -2641,7 +2641,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
         function tmy_admin_head_nav_menus() {
 
             add_meta_box( 'tmy_nav_link_box',
-                          'TMY Language Switch Links',
+                          'Translatio Language Switch Links',
                            array( $this, 'tmy_nav_menu_links_callback' ), 
                            'nav-menus', 'side', 'low' );
 

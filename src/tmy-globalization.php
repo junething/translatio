@@ -8,17 +8,17 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://github.com/tmysoft/tmy-wordpress
+ * @link              https://github.com/translatio-io/translatio
  * @since             1.0.0
  * @package           TMY_G11n
  *
  * @wordpress-plugin
- * Plugin Name:       TMY Globalization
- * Plugin URI:        https://github.com/tmysoft/tmy-wordpress
+ * Plugin Name:       Translatio
+ * Plugin URI:        https://github.com/translatio-io/translatio
  * Description:       Translating your application into other languages.
- * Version:           1.9.0
+ * Version:           1.9.1
  * Author:            Yu Shao
- * Author URI:        https://github.com/tmysoft
+ * Author URI:        https://github.com/translatio-io
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       tmy-g11n
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'TMY_G11N_VERSION', '1.9.0' );
+define( 'TMY_G11N_VERSION', '1.9.1' );
 define( 'WP_TMY_G11N_DEBUG', false );
 
 /**

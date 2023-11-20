@@ -4,7 +4,7 @@ Link: https://www.translatio.io/
 Tags: translation, localization, multilingual, language, woocommerce
 Requires at least: 5.0
 Tested up to: 6.0.2
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,7 +20,7 @@ Translatio is an open source tool for internationalization and localization of W
 
 Live translation workflow provides instant translation based on Google Translate engine. Simply configure the extra languages you want to support through the intutuive setup interface and save, then you are done.
 
-Full Professional workflow provides more control and higher translation quality, which involves extracting the text for translation, translating and integrating back into Wordpress. More specifically TMY plugin hosts your translations locally for proof reading, editing and final publication. You can intergrate machine translation of your choice to prepare your contents, then leveraging fully featured translation editor with any 3rd party translation agencies.
+Full Professional workflow provides more control and higher translation quality, which involves extracting the text for translation, translating and integrating back into Wordpress. More specifically Translatio plugin hosts your translations locally for proof reading, editing and final publication. You can intergrate machine translation of your choice to prepare your contents, then leveraging fully featured translation editor with any 3rd party translation agencies.
 
 Translatio provides multiple ways to handle different development phases of the Wordpress websites with intuitive and easy to use interfaces, some features include:
 
@@ -72,12 +72,15 @@ On CentOS/Feodra Linux system, the error is mostly due to the SE Linux setting w
 6. Language Switcher Locations
 7. Translations Page
 8. 3 Usage Modes
-9. Setup TMY External Editor
+9. Setup Translatio External Editor
 10. External Editor Screen
 11. Globalization Switcher Block
 12. Globalization Switcher Widget
 
 == Changelog ==
+
+= 1.9.1 =
+* change names to Translatio
 
 = 1.9.0 =
 * email translation
