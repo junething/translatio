@@ -159,7 +159,7 @@ class TMY_G11n_Admin {
 	public function tmy_plugin_register_admin_menu() {
 
 
-                $tmy_logo_svg = file_get_contents( plugin_dir_path( __FILE__ ) . 'include/tmy.svg', false);
+                $tmy_logo_svg = file_get_contents( plugin_dir_path( __FILE__ ) . 'include/translatio.svg', false);
                 $tmy_menu_icon = 'data:image/svg+xml;base64,' . base64_encode( $tmy_logo_svg );
 
                 add_menu_page( __( 'Translatio Globalization', 'tmy-globalization'),
@@ -551,7 +551,7 @@ class TMY_G11n_Admin {
 
 		?>		
 
-		<div class="wrap"><h1> <img src="<?php echo plugin_dir_url( __FILE__ ) . 'include/tmy-full.png'; ?>" width="64" alt="TMY"> <?php _e('Globalization Options', 'tmy-globalization') ?></h1>
+                <div class="wrap"><h1> <img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php _e('Translatio Options', 'tmy-globalization') ?></h1>
 		<form method="post" action="options.php">
 		
 		<?php
@@ -1027,7 +1027,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
  	    }
             ?>
-            <div class="wrap"><h1> <img src="<?php echo plugin_dir_url( __FILE__ ) . 'include/tmy-full.png'; ?>" width="64" alt="TMY"> <?php esc_html_e('Globalization Text Translation Manager', 'tmy-globalization') ?></h1>
+            <div class="wrap"><h1><img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translatio Text Translation Manager', 'tmy-globalization') ?></h1>
             <?php
 
             $tmy_g11n_dir = dirname( __FILE__ );
@@ -1055,7 +1055,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
  	    }
             ?>
-            <div class="wrap"><h1> <img src="<?php echo plugin_dir_url( __FILE__ ) . 'include/tmy-full.png'; ?>" width="64" alt="TMY"> <?php esc_html_e('Globalization Taxonomy Translation Manager', 'tmy-globalization') ?></h1>
+            <div class="wrap"><h1> <img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translaio Taxonomy Translation Manager', 'tmy-globalization') ?></h1>
             <?php
 
             //echo "<br>Abc<br>";
@@ -1290,7 +1290,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                     }
 
                     </script>
-                <div class="wrap"><h1> <img src="<?php echo plugin_dir_url( __FILE__ ) . 'include/tmy-full.png'; ?>" width="64" alt="TMY"> <?php esc_html_e('Globalization Dashboard', 'tmy-globalization') ?></h1>
+                <div class="wrap"><h1> <img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translatio Dashboard', 'tmy-globalization') ?></h1>
                 <!--- 
 		<h2>Translation Status:</h2>
                 <button type="button" onclick="G11nGetLocalTranslationStatus()">Refresh Translation Status</button>
@@ -1329,12 +1329,12 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                         'version' => esc_attr(get_option('g11n_server_version'))
                     );
 
-                    $machine_trans_url = esc_url("https://www.tmysoft.com/myprojects.html?tmycode=" . urlencode(http_build_query($query_string)));
+                    $machine_trans_url = esc_url("https://www.translatio.io/myprojects.html?tmycode=" . urlencode(http_build_query($query_string)));
 
                     ?>
                     <br>
                     <br>
-                    <button onclick="location.href=('<?php echo $machine_trans_url; ?>')" target="_blank" type="button">Applying Machine Translation on tmysoft.com</button>
+                    <button onclick="location.href=('<?php echo $machine_trans_url; ?>')" target="_blank" type="button">Applying Machine Translation on translatio.io</button>
                     <br>
                     <br>
                     <?php
@@ -1370,7 +1370,8 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 
 		?>
 		<div class="wrap">
-                <div class="wrap"><h1> <img src="<?php echo plugin_dir_url( __FILE__ ) . 'include/tmy-full.png'; ?>" width="64" alt="TMY"> <?php esc_html_e('Globalization Diagnosis', 'tmy-globalization') ?></h1><br>
+                <div class="wrap"><h1><img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translatio Diagnosis', 'tmy-globalization') ?></h1><br>
+
               <?php _e('This Diagnosis tool provides advanced system information on how your site is running and collects the following information:<br><br>
                  - Base system(phpinfo)<br>
                  - TMYSoft plugin version<br>
@@ -1861,7 +1862,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 		curl_reset($ch);
 		//error_log("create project optional lang list: " . json_encode($lang_list));
 
-		$rest_url = "https://tmysoft.com/api/project/" . $project_name . "/version/" . $version_num . "/locales";
+		$rest_url = "https://translatio.io/api/project/" . $project_name . "/version/" . $version_num . "/locales";
 
                 /*******************************************************************/
                 $args = array(
