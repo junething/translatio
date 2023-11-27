@@ -2415,7 +2415,6 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
             if ( WP_TMY_G11N_DEBUG ) {
                 error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) );
             } 
-                error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) . " " . $old_value . " -> " . $value );
 
             if ((strcmp($option, "g11n_agree_to_leave_email")===0) && (strcmp($value, "on")===0)) {
                 error_log("tmy_plugin_option_update agree_to_leave_email:" . esc_attr(json_encode($option)) . " " . $old_value . " -> " . $value );
