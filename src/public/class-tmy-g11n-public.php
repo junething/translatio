@@ -639,8 +639,8 @@ public function g11n_add_floating_menu() {
 		register_post_type( 'g11n_translation',
 		    array(
 		      'labels' => array(
-			'name' => __( 'Translatio Translations', 'tmy-globalization' ),
-			'singular_name' => __( 'Translatio Translation', 'tmy-globalization' )
+			'name' => __( 'Translations', 'tmy-globalization' ),
+			'singular_name' => __( 'Translation', 'tmy-globalization' )
 		      ),
 		      'public' => true,
 		      'show_ui' => true,
@@ -1299,17 +1299,21 @@ public function g11n_add_floating_menu() {
         }
         public function tmy_woocommerce_option_filter( $value, $option ) {
 
-            //error_log("tmy_woocommerce_option_filter option, " . $option);
+            error_log("tmy_woocommerce_option_filter option, " . $option);
 
             if (($option === "woocommerce_cheque_settings") || ($option === "woocommerce_cod_settings")) {
                 $language_options = get_option('g11n_additional_lang');
                 $g11n_current_language = $this->translator->get_preferred_language();
-                $lang = $language_options[$g11n_current_language];
+                if (! is_null($language_otpions)) {
+                    $language_otpions = array();
+error_log(" 1307 1307 : " . json_encode($language_options));
+                    $lang = $language_options[$g11n_current_language];
 
-                $value["title"] = $this->tmy_text_translator( $value["title"], $lang);
-                $value["description"] = $this->tmy_text_translator( $value["description"], $lang);
-                $value["instructions"] = $this->tmy_text_translator( $value["instructions"], $lang);
+                    $value["title"] = $this->tmy_text_translator( $value["title"], $lang);
+                    $value["description"] = $this->tmy_text_translator( $value["description"], $lang);
+                    $value["instructions"] = $this->tmy_text_translator( $value["instructions"], $lang);
 
+                }
                 //error_log("tmy_woocommerce_option_filter title, " . $value["title"]);
                 //error_log("tmy_woocommerce_option_filter description, " . $value["description"]);
                 //error_log("tmy_woocommerce_option_filter instructions, " . $value["instructions"]);

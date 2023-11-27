@@ -104,6 +104,8 @@ class TMY_G11n_Admin {
 
 	public function tmy_plugin_register_settings() {
 
+    		register_setting( 'tmy-g11n-settings-group', 'g11n_default_email' );
+    		register_setting( 'tmy-g11n-settings-group', 'g11n_agree_to_leave_email' );
     		register_setting( 'tmy-g11n-settings-group', 'g11n_default_lang' );
     		register_setting( 'tmy-g11n-settings-group', 'g11n_additional_lang' );
 
@@ -170,8 +172,8 @@ class TMY_G11n_Admin {
                               $tmy_menu_icon);
 
 		add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'Translatio Setup', 'tmy-globalization'),
-                          	  __( 'Translatio Setup', 'tmy-globalization'),
+                                  __( 'Setup', 'tmy-globalization'),
+                          	  __( 'Setup', 'tmy-globalization'),
                             	  'manage_options', 
                           	  'tmy-g11n-setup-menu', 
                           	  array( $this,
@@ -179,32 +181,32 @@ class TMY_G11n_Admin {
                                   1 );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'Translatio Dashboard', 'tmy-globalization'),
-                          	  __( 'Translatio Dashboard', 'tmy-globalization'),
+                                  __( 'Dashboard', 'tmy-globalization'),
+                          	  __( 'Dashboard', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-g11n-dashboard-menu',
                           	  array( $this,
                                          'tmy_l10n_manager_page') );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'Translatio Taxonomies', 'tmy-globalization'),
-                          	  __( 'Translatio Taxonomies', 'tmy-globalization'),
+                                  __( 'Taxonomies', 'tmy-globalization'),
+                          	  __( 'Taxonomies', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-g11n-taxonomy-menu',
                           	  array( $this,
                                          'tmy_l10n_taxonomy_page') );
 	
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'Translatio Text', 'tmy-globalization'),
-                          	  __( 'Translatio Text', 'tmy-globalization'),
+                                  __( 'Text', 'tmy-globalization'),
+                          	  __( 'Text', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-g11n-text-menu',
                           	  array( $this,
                                          'tmy_l10n_text_page') );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
-                                  __( 'Translatio Diagnosis', 'tmy-globalization'),
-                          	  __( 'Translatio Diagnosis', 'tmy-globalization'),
+                                  __( 'Diagnosis', 'tmy-globalization'),
+                          	  __( 'Diagnosis', 'tmy-globalization'),
                           	  'manage_options',
                           	  'tmy-support-manager',
                           	  array( $this,
@@ -559,12 +561,28 @@ class TMY_G11n_Admin {
     		settings_fields( 'tmy-g11n-settings-group' );
     		do_settings_sections( 'tmy-g11n-settings-group' );
 
+                if (strcmp(get_option('g11n_agree_to_leave_email'),'on' )===0) {
+                    $default_allfields_disabled = "";
+                } else {
+                    $default_allfields_disabled = "disabled";
+                }
 		?>
                     <table class="form-table">
+
+        	<tr valign="top">
+        	<th scope="row"><?php esc_html_e('Email', 'tmy-globalization') ?></th>
+        	<td><input type="text" name="g11n_default_email" value="<?php echo esc_attr( get_option('g11n_default_email',get_option('admin_email')) ); ?>" /> <br>
+                      <input type="checkbox" <?php checked( esc_attr(get_option('g11n_agree_to_leave_email')), "on" ); ?> 
+                             id="g11n_agree_to_leave_email" 
+                             name="g11n_agree_to_leave_email" onClick="javascript:g11n_agree_to_leave_email_func();" />
+                      <label for="g11n_email_yes_checkbox">Translatio protects and respects your privacy, click to agree to receive product and company updates, and you can unsubscribe at any time.</label>
+                </td>
+        	</tr>
+
         		<tr valign="top">
         		<th scope="row"><?php _e('Default Language', 'tmy-globalization') ?></th>
 
-        		<td><select name="g11n_default_lang">
+        		<td><select name="g11n_default_lang" id="g11n_default_lang" <?php echo $default_allfields_disabled; ?> >
 		<?php
         
           	if (!get_option('g11n_default_lang')) {
@@ -576,7 +594,7 @@ class TMY_G11n_Admin {
           	foreach ($complete_lang_list as $lang => $code) :
                		echo '<option value="' . esc_attr($lang) . '" ' . 
                              selected(esc_attr($sys_default_lang), esc_attr($lang)) . ' >' . 
-                             esc_attr($lang) . '</option>';
+                             esc_attr($lang) . ' </option>';
           	endforeach;
 		
 		?>   
@@ -602,11 +620,15 @@ class TMY_G11n_Admin {
 		//    $all_configed_langs = array('English' => "en");
 		//}
 
+                $all_configed_lang_id=0;
+
 		if (is_array($all_configed_langs)) {
 		    foreach( $all_configed_langs as $value => $code) {
 		        echo esc_attr($value). 
                         '('.esc_attr($code).
-                        ') <input type="checkbox" name="g11n_additional_lang['.esc_attr($value).']" value="'.esc_attr($code).'" checked/><br>';
+                        ') <input type="checkbox" ' . $default_allfields_disabled . ' id="g11n_additional_lang_id_' . $all_configed_lang_id . '" ' . 
+                                ' name="g11n_additional_lang['.esc_attr($value).']" value="'.esc_attr($code).'" checked/><br>';
+                        $all_configed_lang_id=$all_configed_lang_id+1;
 		    }
 		}
 		
@@ -614,7 +636,7 @@ class TMY_G11n_Admin {
 
 		------
         	<div id="g11n_new_languages"></div>
-       		<select id="g11n_add_language">
+       		<select id="g11n_add_language" <?php echo $default_allfields_disabled; ?> >
 
 		<?php
         
@@ -625,7 +647,8 @@ class TMY_G11n_Admin {
 
 		?>
 		</select>
-		<button type="button" onclick="G11nmyFunction()">Add Language</button> Click Save To Keep The Changes
+		<button type="button" id="g11n_add_additional_lang_button" <?php echo $default_allfields_disabled; ?>
+                        onclick="G11nmyFunction()">Add Language</button> Click Save To Keep The Changes
 
 		<script>
 		function G11nmyFunction() {
@@ -645,6 +668,76 @@ class TMY_G11n_Admin {
 		    	div.appendChild(cb);
 
 		}
+		function g11n_agree_to_leave_email_func() {
+                    var element = document.getElementById("g11n_agree_to_leave_email"); 
+                    if (element.checked){
+                        document.getElementById("g11n_default_lang").disabled=false;
+                        document.getElementById("g11n_add_language").disabled=false;
+                        document.getElementById("g11n_add_additional_lang_button").disabled=false;
+                        document.getElementById("g11n_using_google_tookit").disabled=false;
+                        document.getElementById("g11n_site_lang_cookie").disabled=false;
+                        document.getElementById("g11n_site_lang_browser").disabled=false;
+                        document.getElementById("g11n_create_project_button").disabled=false;
+                        document.getElementById("g11n_editor_choice").disabled=false;
+                        document.getElementById("g11n_auto_pullpush_translation").disabled=false;
+                        document.getElementById("g11n_resource_file_location").disabled=false;
+                        document.getElementById("g11n_seo_url_enable_no").disabled=false;
+                        document.getElementById("g11n_seo_url_enable_yes").disabled=false;
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_additional_lang_id_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=false;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_switcher_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=false;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_server_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=false;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_l10n_props_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=false;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_l10n_trans_option_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=false;
+                        }
+                    } else {
+                        document.getElementById("g11n_default_lang").disabled=true;
+                        document.getElementById("g11n_add_language").disabled=true;
+                        document.getElementById("g11n_add_additional_lang_button").disabled=true;
+                        document.getElementById("g11n_using_google_tookit").disabled=true;
+                        document.getElementById("g11n_site_lang_cookie").disabled=true;
+                        document.getElementById("g11n_site_lang_browser").disabled=true;
+                        document.getElementById("g11n_create_project_button").disabled=true;
+                        document.getElementById("g11n_editor_choice").disabled=true;
+                        document.getElementById("g11n_auto_pullpush_translation").disabled=true;
+                        document.getElementById("g11n_resource_file_location").disabled=true;
+                        document.getElementById("g11n_seo_url_enable_no").disabled=true;
+                        document.getElementById("g11n_seo_url_enable_yes").disabled=true;
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_additional_lang_id_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=true;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_switcher_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=true;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_server_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=true;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_l10n_props_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=true;
+                        }
+                        var all_additional_langs=document.querySelectorAll('[id^="g11n_l10n_trans_option_"]');
+                        for (var i=0 ; i < all_additional_langs.length ; i++) {
+                                all_additional_langs[i].disabled=true;
+                        }
+                    }
+                }
 		function g11n_using_gtookit_change() {
                     
                     var element = document.getElementById("g11n_using_google_tookit"); 
@@ -673,7 +766,8 @@ class TMY_G11n_Admin {
 
         	<tr valign="top">
         	<th scope="row"><?php _e('Live Translation powered by Google Translate', 'tmy-globalization') ?></th>
-        	<td><select id="g11n_using_google_tookit" name="g11n_using_google_tookit" onChange="javascript:g11n_using_gtookit_change();"> 
+        	<td><select id="g11n_using_google_tookit" <?php echo $default_allfields_disabled; ?> 
+                            name="g11n_using_google_tookit" onChange="javascript:g11n_using_gtookit_change();"> 
         	<!-- <td><select id="g11n_using_google_tookit" name="g11n_using_google_tookit" > -->
                		<option value='Yes'  <?php selected( esc_attr(get_option('g11n_using_google_tookit','No')), 'Yes' ); ?>>Yes</option>
                		<option value='No'  <?php selected( esc_attr(get_option('g11n_using_google_tookit','No')), 'No' ); ?>>No</option>
@@ -682,13 +776,19 @@ class TMY_G11n_Admin {
         	</tr>
 
                 <?php 
-               	    if (strcmp(get_option('g11n_using_google_tookit','No'),'Yes' )===0) {
+               	    if ((strcmp(get_option('g11n_using_google_tookit','No'),'Yes' )===0) || 
+                        (strcmp(get_option('g11n_agree_to_leave_email'),'on' )!==0))
+                    {
                         $config_selected_disable = "disabled";
                         //$config_selected_disable = "";
                     } else {
                         $config_selected_disable = "";
                     }
-                    $config_disable = "";
+               	    if (strcmp(get_option('g11n_agree_to_leave_email'),'on' )===0) {
+                        $config_disable = "";
+                    } else {
+                        $config_disable = "disabled";
+                    }
                 ?>
 
         	<tr valign="top">
@@ -698,7 +798,7 @@ class TMY_G11n_Admin {
             	<input type="checkbox" id="g11n_switcher_tagline" name="g11n_switcher_tagline" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_tagline')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> In Tagline <br>
             	<input type="checkbox" id="g11n_switcher_post" name="g11n_switcher_post" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_post')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> In Each Post <br>
             	<input type="checkbox" id="g11n_switcher_sidebar" name="g11n_switcher_sidebar" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_sidebar')), "Yes" ); ?><?php echo esc_attr($config_selected_disable); ?> /> Top of Sidebar <br>
-            	<input type="checkbox" id="g11n_switcher_floating" name="g11n_switcher_floating" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_floating')), "Yes" ); ?> /> Draggable Floating Menu <br> <br>
+            	<input type="checkbox" id="g11n_switcher_floating" name="g11n_switcher_floating" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_floating')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> Draggable Floating Menu <br> <br>
                 <?php _e('Language Switchers could be added to different locations via widget "Translatio Language Switcher Widget" from "Appearance-> Widgets",<br>
                                                          or Gutenberg block(block) titled "Translatio Language Switcher Block". ', 'tmy-globalization') ?>
  	    	</td>
@@ -818,7 +918,7 @@ class TMY_G11n_Admin {
                         $item_checked = "";
                     }
                     ?>
-            	    <input type="checkbox" id="<?php echo esc_attr($key); ?>" name="g11n_l10n_props_tax[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($key); ?>" <?php echo $item_checked; echo esc_attr($config_disable); ?> /> <?php echo esc_attr($key); ?><br>
+            	    <input type="checkbox" id="g11n_l10n_trans_option_<?php echo esc_attr($key); ?>" name="g11n_l10n_props_tax[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($key); ?>" <?php echo $item_checked; echo esc_attr($config_disable); ?> /> <?php echo esc_attr($key); ?><br>
                     <?php
                 }
 
@@ -850,7 +950,7 @@ class TMY_G11n_Admin {
 
         	<tr valign="top">
         	<th scope="row"><?php esc_html_e('Use Classic Editor', 'tmy-globalization') ?></th>
-        	<td><select name="g11n_editor_choice">
+        	<td><select name="g11n_editor_choice" id="g11n_editor_choice" <?php echo $config_disable; ?> >
                		<option value='Yes'  <?php selected( esc_attr(get_option('g11n_editor_choice','No')), 'Yes' ); ?>>Yes</option>
                		<option value='No'  <?php selected( esc_attr(get_option('g11n_editor_choice','No')), 'No' ); ?>>No</option>
             	</select>
@@ -858,14 +958,15 @@ class TMY_G11n_Admin {
         	</tr>
         	<tr valign="top">
         	<th scope="row"><?php esc_html_e('Auto Push/Pull Translation', 'tmy-globalization') ?></th>
-        	<td><select name="g11n_auto_pullpush_translation">
+        	<td><select name="g11n_auto_pullpush_translation" id="g11n_auto_pullpush_translation" <?php echo $config_disable; ?>>
                		<option value='No'  <?php selected( esc_attr(get_option('g11n_auto_pullpush_translation')), 'No' ); ?>>No</option>
             	</select>
         	</td>
         	</tr>
         	<tr valign="top">
         	<th scope="row"><?php esc_html_e('Translation Resource File Directory', 'tmy-globalization') ?></th>
-        	<td><input type="text" name="g11n_resource_file_location" value="<?php echo esc_attr( get_option('g11n_resource_file_location') ); ?>" /></td>
+        	<td><input type="text" id="g11n_resource_file_location" name="g11n_resource_file_location" <?php echo $config_disable; ?>
+                                       value="<?php echo esc_attr( get_option('g11n_resource_file_location') ); ?>" /></td>
         	</tr>
 
         	</tr>
@@ -875,11 +976,13 @@ class TMY_G11n_Admin {
                          $theme_name = get_template();
                          $all_langs = get_option('g11n_additional_lang', array());
                          $default_lang = get_option('g11n_default_lang');
-                         unset($all_langs[$default_lang]);
-                         foreach( $all_langs as $value => $code) {
-                             echo WP_LANG_DIR . '/' . $code . '.mo <br>';
-                             echo WP_LANG_DIR . '/themes/' . $theme_name."-".$code . '.mo <br>';
-                         } 
+                         if (is_array($all_langs)) {
+                             unset($all_langs[$default_lang]);
+                             foreach( $all_langs as $value => $code) {
+                                 echo WP_LANG_DIR . '/' . $code . '.mo <br>';
+                                 echo WP_LANG_DIR . '/themes/' . $theme_name."-".$code . '.mo <br>';
+                             } 
+                         }
                      ?>
                 </td>
         	</tr>
@@ -907,12 +1010,12 @@ class TMY_G11n_Admin {
                          //echo "Change the Permalinks Setting to non-Plain to start: Settings->Permalinks<br><br>";
 
 		         $selected_no = ($current_seo_option === 'No') ? 'checked' : '';
-		         echo "\n\t<input type='radio' onclick=\"tmy_seo_url_option_changed('No');\" id='g11n_seo_url_enable_no".
+		         echo "\n\t<input type='radio' $config_disable onclick=\"tmy_seo_url_option_changed('No');\" id='g11n_seo_url_enable_no".
                                     "' name='g11n_seo_url_enable' value='No' " . 
                                     esc_attr($selected_no) . " " . esc_attr($seo_disabled) . " > <label> " . 'No' . "</label><br><br>";
 
 		         $selected_yes = ($current_seo_option === 'Yes') ? 'checked' : '';
-		         echo "\n\t<input type='radio' onclick=\"tmy_seo_url_option_changed('Yes');\" id='g11n_seo_url_enable_yes".
+		         echo "\n\t<input type='radio' $config_disable onclick=\"tmy_seo_url_option_changed('Yes');\" id='g11n_seo_url_enable_yes".
                                     "' name='g11n_seo_url_enable' value='Yes' " .
                                     esc_attr($selected_yes) . " " . esc_attr($seo_disabled) . " > <label> " . 
                                     'Yes - URL format: ' . esc_url($blog_url) . 
@@ -925,12 +1028,14 @@ class TMY_G11n_Admin {
                              echo "<div id=\"tmy_seo_example_urls\" style=\"display: none\"><br>";
                          }
                          $all_langs = get_option('g11n_additional_lang',array());
-                         $rewrite_rules = strtolower(implode("|", $all_langs));
-                         $rewrite_rules = str_replace('_', '-', $rewrite_rules);
+                         if (is_array($all_langs)) {
+                             $rewrite_rules = strtolower(implode("|", $all_langs));
+                             $rewrite_rules = str_replace('_', '-', $rewrite_rules);
 
-                         foreach( $all_langs as $value => $code) {
-                             echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" . esc_url($blog_url) . "/" . esc_attr(strtolower(str_replace('_', '-', $code))) . "/ (" . esc_attr($value) . " URL)<br>";
-                         } 
+                             foreach( $all_langs as $value => $code) {
+                                 echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" . esc_url($blog_url) . "/" . esc_attr(strtolower(str_replace('_', '-', $code))) . "/ (" . esc_attr($value) . " URL)<br>";
+                             } 
+                         }
                          echo "</div><br>";
 
 
@@ -1329,7 +1434,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                         'version' => esc_attr(get_option('g11n_server_version'))
                     );
 
-                    $machine_trans_url = esc_url("https://www.translatio.io/myprojects.html?tmycode=" . urlencode(http_build_query($query_string)));
+                    $machine_trans_url = esc_url("https://members.translatio.io/myprojects.html?tmycode=" . urlencode(http_build_query($query_string)));
 
                     ?>
                     <br>
@@ -1374,7 +1479,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 
               <?php _e('This Diagnosis tool provides advanced system information on how your site is running and collects the following information:<br><br>
                  - Base system(phpinfo)<br>
-                 - TMYSoft plugin version<br>
+                 - Translatio plugin version<br>
                  - Default theme<br>
                  - Some system options that can impact how the plugin may be functioning<br><br>
                  If you need further assistance to trouble shoot your site, please review the below diagnostic information to ensure there is no sensitive information included, click copy and email it to <a href="mailto:yu.shao.gm@gmail.com">yu.shao.gm@gmail.com</a> in email.', 'tmy-globalization') ?>
@@ -1862,7 +1967,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 		curl_reset($ch);
 		//error_log("create project optional lang list: " . json_encode($lang_list));
 
-		$rest_url = "https://translatio.io/api/project/" . $project_name . "/version/" . $version_num . "/locales";
+		$rest_url = "https://members.translatio.io/api/project/" . $project_name . "/version/" . $version_num . "/locales";
 
                 /*******************************************************************/
                 $args = array(
@@ -2310,10 +2415,45 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
             if ( WP_TMY_G11N_DEBUG ) {
                 error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) );
             } 
+                error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) . " " . $old_value . " -> " . $value );
 
-            if (((strcmp($option, "g11n_additional_lang")===0) && ($value != $old_value)) ||
-                ((strcmp($option, "g11n_server_project")===0) && ($value != $old_value)) ||
-                ((strcmp($option, "g11n_server_version")===0) && ($value != $old_value))) {
+            if ((strcmp($option, "g11n_agree_to_leave_email")===0) && (strcmp($value, "on")===0)) {
+                error_log("tmy_plugin_option_update agree_to_leave_email:" . esc_attr(json_encode($option)) . " " . $old_value . " -> " . $value );
+
+	        $ch = curl_init();
+ 	        curl_reset($ch);
+                $rest_url = "https://members.translatio.io/api/pluginsignupemail/" . $value;
+
+                $args = array(
+                    'headers' => array( 'Content-Type' => 'application/json'),
+                    'method' => 'PUT',
+                    'body' => json_encode(array("email" => get_option('g11n_default_email'))),
+                    'timeout' => 10
+                );
+                $response = wp_remote_post( $rest_url, $args );
+
+                if ( is_array( $response ) && ! is_wp_error( $response ) ) {
+                    $output = $response['body'];
+                    $payload = json_decode($output);
+                } else {
+                    if ( WP_TMY_G11N_DEBUG ) {
+                        error_log("In tmy_plugin_option_update, Sign up email error: " . esc_attr($response->get_error_message()));
+                    }
+                }
+                $http_code = wp_remote_retrieve_response_code( $response );
+
+                if ($http_code === 200) {
+                    $ret_msg .= "; sign up email updated";
+                } else {
+                    $ret_msg .= "; sign up email not updated";
+                }
+                curl_close($ch);
+                error_log("tmy_plugin_option_update agree_to_leave_email: " . $ret_msg );
+
+            }
+            if (((strcmp($option, "g11n_additional_lang")===0) && ($value != $old_value) && ! is_null($value) ) ||
+                ((strcmp($option, "g11n_server_project")===0) && ($value != $old_value) && ! is_null($value) ) ||
+                ((strcmp($option, "g11n_server_version")===0) && ($value != $old_value) && ! is_null($value))) {
  
                 if (strcmp($option, "g11n_server_project")===0) {
                     $project_name = $value;
