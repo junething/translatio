@@ -196,6 +196,9 @@ class TMY_G11n_Public {
     		}
 
                 $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
+                if (! is_array($all_configed_langs)) {
+                    $all_configed_langs = array();
+                }
                 $current_lang = "";
                 $current_lang_code = "";
                 if (isset($_SESSION['g11n_language'])) {
@@ -570,7 +573,9 @@ public function g11n_add_floating_menu() {
 
                 /* array format ((English -> en), ...) */
                 $language_options = get_option('g11n_additional_lang', array());
-
+                if (! is_array($language_options)) {
+                    return $locale_in; 
+                }
                 /******
                 $http_referer_path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
                 $site_url_path = parse_url(get_site_url(), PHP_URL_PATH);
@@ -612,6 +617,7 @@ public function g11n_add_floating_menu() {
                 if (strcmp($current_lang, "")===0) {
                     $current_lang = get_option('g11n_default_lang');
                 }
+error_log("SHAOMYSQL" . var_export($language_options,true));
                 $current_lang_code = $language_options[$current_lang];
 
                 if ( WP_TMY_G11N_DEBUG ) {

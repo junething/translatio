@@ -683,6 +683,7 @@ class TMY_G11n_Admin {
                         document.getElementById("g11n_resource_file_location").disabled=false;
                         document.getElementById("g11n_seo_url_enable_no").disabled=false;
                         document.getElementById("g11n_seo_url_enable_yes").disabled=false;
+                        document.getElementById("submit").disabled=false;
                         var all_additional_langs=document.querySelectorAll('[id^="g11n_additional_lang_id_"]');
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
                                 all_additional_langs[i].disabled=false;
@@ -747,6 +748,7 @@ class TMY_G11n_Admin {
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
                                 all_additional_langs[i].disabled=true;
                         }
+                        document.getElementById("submit").disabled=true;
                     }
                 }
 		function g11n_using_gtookit_change() {
@@ -1128,7 +1130,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 
     		</table>
     			<!-- <?php submit_button(); ?> -->
-                        <input type="submit" name="submit" id="submit" class="button button-primary" onclick="G11nmyOptionSaveChanges()" value="Save Changes"  /> &nbsp; <div id="tmy_save_changes_status" style="display:inline-block; vertical-align: middle;"></div><br>
+                        <input type="submit" name="submit" id="submit" class="button button-primary" <?php echo esc_attr($config_disable); ?> onclick="G11nmyOptionSaveChanges()" value="Save Changes"  /> &nbsp; <div id="tmy_save_changes_status" style="display:inline-block; vertical-align: middle;"></div><br>
 		</form>
 
                 <script>
@@ -2428,6 +2430,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 
 	public function tmy_plugin_option_update($value, $option, $old_value) {
 
+            $ret_msg = "";
             if ( WP_TMY_G11N_DEBUG ) {
                 error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) );
             } 
