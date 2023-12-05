@@ -687,10 +687,6 @@ class TMY_G11n_Admin {
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
                                 all_additional_langs[i].disabled=false;
                         }
-                        var all_additional_langs=document.querySelectorAll('[id^="g11n_switcher_"]');
-                        for (var i=0 ; i < all_additional_langs.length ; i++) {
-                                all_additional_langs[i].disabled=false;
-                        }
                         var all_additional_langs=document.querySelectorAll('[id^="g11n_server_"]');
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
                                 all_additional_langs[i].disabled=false;
@@ -702,6 +698,21 @@ class TMY_G11n_Admin {
                         var all_additional_langs=document.querySelectorAll('[id^="g11n_l10n_trans_option_"]');
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
                                 all_additional_langs[i].disabled=false;
+                        }
+
+                        var google_live_element = document.getElementById("g11n_using_google_tookit");
+                        if (google_live_element.value=='Yes'){
+                            document.getElementById("g11n_switcher_title").disabled=true;
+                            document.getElementById("g11n_switcher_tagline").disabled=true;
+                            document.getElementById("g11n_switcher_post").disabled=true;
+                            document.getElementById("g11n_switcher_sidebar").disabled=true;
+                            document.getElementById("g11n_switcher_floating").disabled=false;
+                        } else {
+                            document.getElementById("g11n_switcher_title").disabled=false;
+                            document.getElementById("g11n_switcher_tagline").disabled=false;
+                            document.getElementById("g11n_switcher_post").disabled=false;
+                            document.getElementById("g11n_switcher_sidebar").disabled=false;
+                            document.getElementById("g11n_switcher_floating").disabled=true;
                         }
                     } else {
                         document.getElementById("g11n_default_lang").disabled=true;
@@ -747,6 +758,7 @@ class TMY_G11n_Admin {
                         document.getElementById("g11n_switcher_tagline").disabled=true;
                         document.getElementById("g11n_switcher_post").disabled=true;
                         document.getElementById("g11n_switcher_sidebar").disabled=true;
+                        document.getElementById("g11n_switcher_floating").disabled=false;
                     }
                     if(element.value=='No'){
                         console.log("no");
@@ -754,6 +766,7 @@ class TMY_G11n_Admin {
                         document.getElementById("g11n_switcher_tagline").disabled=false;
                         document.getElementById("g11n_switcher_post").disabled=false;
                         document.getElementById("g11n_switcher_sidebar").disabled=false;
+                        document.getElementById("g11n_switcher_floating").disabled=true;
                     }
                 
 
@@ -776,18 +789,21 @@ class TMY_G11n_Admin {
         	</tr>
 
                 <?php 
-               	    if ((strcmp(get_option('g11n_using_google_tookit','No'),'Yes' )===0) || 
-                        (strcmp(get_option('g11n_agree_to_leave_email'),'on' )!==0))
-                    {
+                    if (strcmp(get_option('g11n_agree_to_leave_email'),'on' )!==0) {
                         $config_selected_disable = "disabled";
-                        //$config_selected_disable = "";
-                    } else {
-                        $config_selected_disable = "";
-                    }
-               	    if (strcmp(get_option('g11n_agree_to_leave_email'),'on' )===0) {
-                        $config_disable = "";
-                    } else {
                         $config_disable = "disabled";
+                        $config_draggable_selected_disable ="disabled";
+                    } else {
+                        $config_disable = "";
+               	        if ((strcmp(get_option('g11n_using_google_tookit','No'),'Yes' )===0))
+                        {
+                            $config_selected_disable = "disabled";
+                            $config_draggable_selected_disable =" ";
+                            //$config_selected_disable = "";
+                        } else {
+                            $config_selected_disable = "";
+                            $config_draggable_selected_disable ="disabled";
+                        }
                     }
                 ?>
 
@@ -798,7 +814,7 @@ class TMY_G11n_Admin {
             	<input type="checkbox" id="g11n_switcher_tagline" name="g11n_switcher_tagline" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_tagline')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> In Tagline <br>
             	<input type="checkbox" id="g11n_switcher_post" name="g11n_switcher_post" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_post')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> In Each Post <br>
             	<input type="checkbox" id="g11n_switcher_sidebar" name="g11n_switcher_sidebar" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_sidebar')), "Yes" ); ?><?php echo esc_attr($config_selected_disable); ?> /> Top of Sidebar <br>
-            	<input type="checkbox" id="g11n_switcher_floating" name="g11n_switcher_floating" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_floating')), "Yes" ); ?> <?php echo esc_attr($config_selected_disable); ?>/> Draggable Floating Menu <br> <br>
+            	<input type="checkbox" id="g11n_switcher_floating" name="g11n_switcher_floating" value="Yes" <?php checked( esc_attr(get_option('g11n_switcher_floating')), "Yes" ); ?> <?php echo esc_attr($config_draggable_selected_disable); ?>/> Draggable Floating Menu <br> <br>
                 <?php _e('Language Switchers could be added to different locations via widget "Translatio Language Switcher Widget" from "Appearance-> Widgets",<br>
                                                          or Gutenberg block(block) titled "Translatio Language Switcher Block". ', 'tmy-globalization') ?>
  	    	</td>

@@ -3,7 +3,7 @@ Contributors: yushao
 Link: https://www.translatio.io/
 Tags: translation, localization, multilingual, language, woocommerce
 Requires at least: 5.0
-Tested up to: 6.0.2
+Tested up to: 6.4.1
 Stable tag: 1.9.4
 Requires PHP: 7.0
 License: GPLv2 or later
