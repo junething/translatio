@@ -8,9 +8,13 @@ Translatio is an open source tool for internationalization and localization of W
 
 ## Avada
 
-<kbd><img src="doc/translatio-addplugin.png" width="450"/></kbd>
+- Avada version tested: V7.11.2
 
-Download the Translatio zip file from https://github.com/translatio-io/translatio/releases, e.g. translatio-globalization-1.0.0.zip 
+- After Avada is installed, enable it with Translatio plugin by Avada Dashboard -> Options -> Builder Options, then scroll down to the "Post Types" section, enable Translation by click it and save the changes.
+
+<kbd><img src="doc/theme-avada-enable.png" width="450"/></kbd>
+
+-Download the Translatio zip file from https://github.com/translatio-io/translatio/releases, e.g. translatio-globalization-1.0.0.zip 
 
 Or, search for "Translatio" in the WordPress plugin directory and install it. After successful installation the Translatio main menu will appear in your WordPress Dashboard:
 
