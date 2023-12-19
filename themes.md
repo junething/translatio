@@ -53,6 +53,6 @@ Translatio is an open source tool for internationalization and localization of W
 - Apply translation using machine translations <br>
   <kbd><img src="doc/theme-apply-trans.png" width="500"/></kbd>
 
-- Sync up with Wordpress and Done
+- Sync up with Wordpress and Done<br>
   <kbd><img src="doc/theme-sync-trans.png" width="500"/></kbd>
 
