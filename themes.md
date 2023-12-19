@@ -44,4 +44,9 @@ Translatio is an open source tool for internationalization and localization of W
 ## "Auto" Translation
 
 - Get user credentials from translatio.io, fill in the Translation Server(Optional) section in "Translatio Globalization" -> "Setup"
-    <kbd><img src="doc/theme-server-setup.png" width="500"/></kbd>
+  <kbd><img src="doc/theme-server-setup.png" width="500"/></kbd>
+
+- From "Translatio Globalization" -> "Dashboard", visit "Apply Machine Translation" Page
+  <kbd><img src="doc/theme-translatio-dashboard.png" width="500"/></kbd><br>
+  <kbd><img src="doc/theme-translatio-members.png" width="500"/></kbd>
+
