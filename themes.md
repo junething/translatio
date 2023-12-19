@@ -15,7 +15,7 @@ Translatio is an open source tool for internationalization and localization of W
   <kbd><img src="doc/theme-avada-enable.png" width="600"/></kbd>
 
 - Setup language switcher menu
-  From "Appearance" -> "Menu", choose the menu you want to add langauge switcher, then add from Translatio preset menu items<br>
+  From "Appearance" -> "Menus", choose the menu you want to add langauge switcher, then add from Translatio preset menu items<br>
   <kbd><img src="doc/theme-avada-menu.png" width="600"/></kbd>
   
 - Translating "About" Page
@@ -41,3 +41,7 @@ Translatio is an open source tool for internationalization and localization of W
   - Translatio supports Avada elements:
     - Header and Footer
 
+## "Auto" Translation
+
+- Get user credentials from translatio.io, fill in the Translation Server(Optional) section in "Translatio Globalization" -> "Setup"
+    <kbd><img src="doc/theme-server-setup.png" width="500"/></kbd>
