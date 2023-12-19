@@ -1,37 +1,12 @@
-# Translatio plugin for WordPress Getting Started & FAQ
+# Translatio plugin for WordPress Themes Started & FAQ
 
 ----
 
-Translatio is an open source tool for internationalization and localization of WordPress based websites. Translatio provides two translation workflows:
-
-* Live translation workflow
-* Full professional translation workflow
-
-Live translation workflow provides instant translation based on the Google Translate engine. Simply configure the extra languages you want to support through the intuitive setup interface, save, and then you are done.
-
-Full professional workflow provides more control and higher translation quality, which involves extracting the text, undertaking translation and integrating this back into WordPress. Translatio ensures you are always in control by hosting your translations locally for proof reading, editing and final publication. You can integrate machine translation of your choice to provide a foundation translation, then leverage the fully featured translation editor with any 3rd party translation agencies.
-
-Translatio provides multiple ways to handle different development phases of your WordPress website, with intuitive and easy to use interfaces. 
-Some features include:
-
-* Live translation powered by Google Translate
-* Full cycle to keep translation locally for proof read, edit and publish
-* Support for the new block Gutenberg editor and classic editor
-* Support for Google Translate integration with editing capability
-* Language switcher options include:
-  * Draggable floating menu
-  * Sidebar widget
-  * Along with title or description
-  * With any page or post
-* Display the language switcher in using the language name or country flag
-* Auto-detect a visitors browser language setting and display your site in their language (if it is available, otherwise will display the site in the default language)
-* Support for browser cookie settings
-* Premium service available that provides you a professional translation editor and workflow, that syncs all translations back to your WordPress instance
-* Live support community
+Translatio is an open source tool for internationalization and localization of WordPress based websites. Here are guide to use it with different wordpress themes
 
 ----
 
-## Install and activate Translatio
+## Avada
 
 <kbd><img src="doc/translatio-addplugin.png" width="450"/></kbd>
 
