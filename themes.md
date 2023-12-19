@@ -50,8 +50,9 @@ Translatio is an open source tool for internationalization and localization of W
   <kbd><img src="doc/theme-translatio-dashboard.png" width="500"/></kbd><br>
   <kbd><img src="doc/theme-translatio-members.png" width="500"/></kbd>
 
-- Apply translation using machine translations 
+- Apply translation using machine translations <br>
   <kbd><img src="doc/theme-apply-trans.png" width="500"/></kbd>
 
 - Sync up with Wordpress and Done
+  <kbd><img src="doc/theme-sync-trans.png" width="500"/></kbd>
 
