@@ -26,6 +26,14 @@ Translatio is an open source tool for internationalization and localization of W
   - Done
    
 - Translating Avada Global container
+  - If you use Avada Global container, edit the container in Avada -> Library or click the "Save Container" then click "Edit" butto of the global container button<br>
+    <kbd><img src="doc/theme-avada-global-container.png" width="500"/></kbd>
+  - Start the translation the same way in the Translation Status like you are tranlating a normal page
+  - In the page that uses the global container, translated page will shown up automatically, then save and publish<br>
+    <kbd><img src="doc/theme-avada-global-container-done.png" width="500"/></kbd>
+  - Done
+
+translate the global container like you are translating the normal pageLoad the page in Wordpress Dashboard, follow Pages -> All Pages, then choose "About".
 
 -Download the Translatio zip file from https://github.com/translatio-io/translatio/releases, e.g. translatio-globalization-1.0.0.zip 
   <kbd><img src="doc/theme-avada-enable.png" width="450"/></kbd>
