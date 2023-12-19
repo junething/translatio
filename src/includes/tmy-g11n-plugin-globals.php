@@ -71,6 +71,8 @@ function tmy_g11n_available_post_types() {
  
     $post_types = get_post_types( array( 'public' => true ));
     unset($post_types['g11n_translation']); 
+    $post_types['fusion_element'] = 'fusion_element';
+    $post_types['fusion_tb_section'] = 'fusion_tb_section';
     return $post_types;
 
 }
@@ -79,6 +81,8 @@ function tmy_g11n_is_valid_post_type($post_type) {
  
     $post_types = get_post_types( array( 'public' => true ));
     unset($post_types['g11n_translation']); 
+    $post_types['fusion_element'] = 'fusion_element';
+    $post_types['fusion_tb_section'] = 'fusion_tb_section';
     return array_key_exists($post_type,$post_types);
 
 }
@@ -88,6 +92,8 @@ function tmy_g11n_available_post_type_options() {
     $ret_array = array();
  
     $post_types = get_post_types( array( 'public' => true ));
+    $post_types['fusion_element'] = 'fusion_element';
+    $post_types['fusion_tb_section'] = 'fusion_tb_section';
     unset($post_types['g11n_translation']); 
 
     foreach ( $post_types  as $post_type ) {

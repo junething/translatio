@@ -308,6 +308,10 @@ class TMY_G11n {
 		//$this->loader->add_filter( 'the_excerpt', $plugin_public, 'g11n_excerpt_filter' );
 		//$this->loader->add_filter( 'get_the_excerpt', $plugin_public, 'g11n_excerpt_filter' );
 		$this->loader->add_filter( 'the_posts', $plugin_public, 'g11n_the_posts_filter' );
+		//$this->loader->add_filter( 'the_post', $plugin_public, 'g11n_the_post_filter', 10, 2 );
+
+		$this->loader->add_filter( 'wpml_object_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
+		$this->loader->add_filter( 'fusion_layout_section_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
 
 		$this->loader->add_filter( 'pre_option_blogname', $plugin_public, 'g11n_pre_get_option_blogname',10, 2);
 		$this->loader->add_filter( 'pre_option_blogdescription', $plugin_public, 'g11n_pre_get_option_blogdescription',10, 2);
