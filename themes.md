@@ -21,8 +21,8 @@ Translatio is an open source tool for internationalization and localization of W
     <kbd><img src="doc/theme-trans-status.png" width="400"/></kbd>
   - Once the Id is shown up in each Language, click it to edit the language Translation Page
     <kbd><img src="doc/theme-trans-start-trans.png" width="400"/></kbd>
-    <kbd><img src="doc/theme-trans-finished.png" width="400"/></kbd>
   - Fill in the translation in the language page and Publish
+    <kbd><img src="doc/theme-trans-finished.png" width="400"/></kbd>
   - Done
    
 - Translating Avada Global container
