@@ -14,6 +14,8 @@ Translatio is an open source tool for internationalization and localization of W
 
   <kbd><img src="doc/theme-avada-enable.png" width="600"/></kbd>
 
+- Setup language switcher menu
+
 - Translating "About" Page
 
   - Load the page in Wordpress Dashboard, follow Pages -> All Pages, then choose "About".
