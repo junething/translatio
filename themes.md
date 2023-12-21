@@ -41,7 +41,7 @@ Translatio is an open source tool for internationalization and localization of W
   - Translatio supports Avada elements:
     - Header 
     - Footer
-    - Megamenu
+    - Megamenu<br>
       <kbd><img src="doc/theme-avada-megamenu.png" width="400"/></kbd>
 
 
