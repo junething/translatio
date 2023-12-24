@@ -485,6 +485,67 @@ class TMY_G11n_Translator {
 
         }
 
+        //todo copied this to translastor class already, need to sync up if there is any change
+        //Dec 23 2023
+
+        public function _update_g11n_translation_status( $id, $html_flag = false ) {
+
+                $post_id = $id;
+                $post_type = get_post_type($post_id);
+                $post_status = get_post_status($post_id);
+            
+                if ( WP_TMY_G11N_DEBUG ) {
+                    error_log("In _update_g11n_translation_status: ".esc_attr($post_id));
+                }
+               
+	    	if (strcmp($post_type,"g11n_translation")!==0) {
+                    return '';
+                }
+
+	    	if (strcmp($post_type,"g11n_translation")===0) {
+                    $original_id = get_post_meta($post_id, 'orig_post_id', true);
+                    $original_type = get_post_meta($post_id, 'g11n_tmy_orig_type', true);
+                    $original_title = get_the_title($original_id);
+
+                    if ( tmy_g11n_post_type_enabled($original_id, $original_title, $original_type) ) {
+                        if (strcmp($post_status,"publish")===0) {
+                            $translation_entry_status = 'LIVE'; 
+                            update_post_meta( $post_id, 'g11n_tmy_lang_status', 'LIVE');
+                            if ( $html_flag ) {
+                                $translation_entry_status = '<button type="button" style="background-color:#4CAF50;color:white; height:25px;" >' . 
+                                __( 'LIVE', 'tmy-globalization') . '</button>';
+                            }
+                        } else {
+                            $translation_entry_status = 'PROGRESS'; 
+                            update_post_meta( $post_id, 'g11n_tmy_lang_status', 'PROGRESS');
+                            if ( $html_flag ) {
+                                $translation_entry_status = '<button type="button" style="background-color:#EE9A4D;color:white; height:25px;" >' .
+                                __( 'IN PROGRESS', 'tmy-globalization') . '</button>';
+                            }
+                        }
+                    } else {
+                        if (strcmp($post_status,"publish")===0) {
+                            $translation_entry_status = 'DISABLED-LIVE'; 
+                            update_post_meta( $post_id, 'g11n_tmy_lang_status', 'DISABLED-LIVE');
+                            if ( $html_flag ) {
+                                $translation_entry_status = '<button type="button" style="background-color:#C0C0C0;color:white; height:25px;" >' .
+                                __( 'DISABLED', 'tmy-globalization') . '</button>';
+                            }
+                        } else {
+                            $translation_entry_status = 'DISABLED-PROGRESS'; 
+                            update_post_meta( $post_id, 'g11n_tmy_lang_status', 'DISABLED-PROGRESS');
+                            if ( $html_flag ) {
+                                $translation_entry_status = '<button type="button" style="background-color:#C0C0C0;color:white; height:25px;" >' .
+                                __( 'DISABLED', 'tmy-globalization') . '</button>';
+                            }
+                        }
+                    }
+
+                    return $translation_entry_status;
+                }
+        }
+
+
 	public function get_preferred_language() {
 
            

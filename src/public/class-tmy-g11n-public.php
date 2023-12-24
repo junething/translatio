@@ -1455,8 +1455,8 @@ public function g11n_add_floating_menu() {
             if (($option === "woocommerce_cheque_settings") || ($option === "woocommerce_cod_settings")) {
                 $language_options = get_option('g11n_additional_lang');
                 $g11n_current_language = $this->translator->get_preferred_language();
-                if (! is_null($language_otpions)) {
-                    $language_otpions = array();
+                if (! is_null($language_options)) {
+                    $language_options = array();
 error_log(" 1307 1307 : " . json_encode($language_options));
                     $lang = $language_options[$g11n_current_language];
 
