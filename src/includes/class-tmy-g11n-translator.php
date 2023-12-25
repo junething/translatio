@@ -177,6 +177,19 @@ class TMY_G11n_Translator {
                     (strcmp('', get_option('g11n_server_token','')) !== 0)) {
 
 		    $ch = curl_init();
+
+                    $default_language = get_option("g11n_default_lang", "English");
+                    $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
+                    if (is_array($all_configed_langs)) {
+                        if (isset($all_configed_langs[$default_language])) {
+                            $pref_lang = $all_configed_langs[$default_language];
+                        }
+                    } else {
+                            $pref_lang = "en_US";
+                    }
+                    $pref_lang = str_replace('_', '-', $pref_lang);
+                    error_log("set language push doc to server: ". $pref_lang);
+
 		    $payload_contents_array = array();
 		    foreach ($contents_array as &$con) {
 		        $con_id = md5($con);
@@ -184,7 +197,10 @@ class TMY_G11n_Translator {
 				                                        "references" => array(),
 				                                        "flags" => array(),
 				                                        "context" => "")),
-				                        "lang" => "en-US",
+                                                        //Dec 2023, change to using default language
+				                        //"lang" => "en-US",
+				                        "lang" => "zh-CN",
+				                        //"lang" => $pref_lang,
 				                        "id" => "$con_id",
 				                        "plural" => false,
 				                        "content" => "$con"

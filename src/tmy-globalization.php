@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Rename this for your plugin and update it as you release new versions.
  */
 define( 'TMY_G11N_VERSION', '1.9.6' );
-define( 'WP_TMY_G11N_DEBUG', false );
+define( 'WP_TMY_G11N_DEBUG', true );
 
 /**
  * The code that runs during plugin activation.
