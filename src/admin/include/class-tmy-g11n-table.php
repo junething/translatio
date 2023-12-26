@@ -641,10 +641,29 @@ public function __construct() {
                                                      // id, means out of sync, will show no id
 
                                                      if (isset($translation_id)) {
+
+                                                         if (strcmp(get_current_theme(), "Avada") === 0) {
+                                                             //preg_match_all("/fusion_global=\"([^\]]*)\"/", $translation_contents, $gc_matches);
+                                                             preg_match_all("/fusion_global id=\"([^\]]*)\"/", $translation_contents, $gc_matches);
+                                                             foreach ($gc_matches[0] as $key => $full_match_str) {
+                                                                 $gc_post_type = get_post_field("post_type", $gc_matches[1][$key]);
+                                                                 $gc_translation_id = $this->translator->get_translation_id($gc_matches[1][$key],
+                                                                                                                        $stat_row->locale,
+                                                                                                                        $gc_post_type,
+                                                                                                                        true);
+                                                                 error_log( "AVADA global container adjutment $full_match_str " . $gc_matches[1][$key] . "->" . $gc_translation_id);
+                                                                 if (isset($gc_translation_id)) {
+                                                                     $new_global_id_str = str_replace($gc_matches[1][$key], $gc_translation_id, $full_match_str);
+                                                                     $translation_contents = str_replace($full_match_str, $new_global_id_str, $translation_contents);
+                                                                 }
+                                                             }
+                                                         }
+
                                                          $update_post_id = wp_update_post(array(
                                                                         'ID'    => $translation_id,
                                                                         'post_title'    => $translation_title,
                                                                         'post_content'  => $translation_contents,
+                                                                        'post_status'  => "publish",
                                                                         'post_type'  => "g11n_translation"));
                                                      }
                                                      $this->translator->_update_g11n_translation_status($translation_id);
