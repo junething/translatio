@@ -228,6 +228,9 @@ class TMY_G11n_Admin {
 
 	}
 
+        //todo copied this to translastor class already, need to sync up if there is any change
+        //Dec 23 2023
+
         public function _update_g11n_translation_status( $id, $html_flag = false ) {
 
                 $post_id = $id;
@@ -1113,7 +1116,7 @@ RewriteCond %{HTTPS} off <br>
 RewriteRule ^(<?php echo $rewrite_rules; ?>)/(.*) http://%{HTTP_HOST}<?php echo esc_attr($home_root); ?>$2?g11n_tmy_lang_code=$1 [QSA,P,NC] <br>
 RewriteCond %{HTTPS} on <br>
 RewriteRule ^(<?php echo $rewrite_rules; ?>)/(.*) https://%{HTTP_HOST}<?php echo esc_attr($home_root); ?>$2?g11n_tmy_lang_code=$1 [QSA,P,NC] <br>
-&lt;IfModule&gt; <br>
+&lt;/IfModule&gt; <br>
 # END TMY_G11N_RULES <br> </b>
 &lt;IfModule mod_rewrite.c&gt; <br>
 RewriteEngine On <br>
@@ -1123,7 +1126,7 @@ RewriteRule ^index\.php$ - [L] <br>
 RewriteCond %{REQUEST_FILENAME} !-f <br>
 RewriteCond %{REQUEST_FILENAME} !-d <br>
 RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
-&lt;IfModule&gt; <br>
+&lt;/IfModule&gt; <br>
 </div></div>
                 </td>
                 </tr>
@@ -1291,6 +1294,66 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
             return;
 
         }
+        public function tmy_translation_dashboard_table_action() {
+
+            if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
+                $nonce  = filter_input( INPUT_POST, '_wpnonce', FILTER_SANITIZE_STRING );
+                $action = 'bulk-' . $this->_args['plural'];
+
+                if ( ! wp_verify_nonce( $nonce, $action ) )
+                    wp_die( 'Nope! Security check failed!' );
+            }
+
+            $action = current_action();
+
+            if ( isset( $_POST['action'] )) {
+
+                switch ( esc_attr($_POST['action']) ) {
+
+                    case 'sync_translation_server_list':
+
+                        $term_ids = esc_sql($_POST['term_id']);
+                        //echo '<div class="notice notice-success is-dismissible"><p> bulk action' .implode("-", $term_ids) . '</p></div>';
+
+error_log("return rows");
+
+                        $q_rows = array();
+                        $q_rows[] = array( "name_str"=>"wordpres-dddeeeee",
+                                       "title"=>"BBB Labeleeee",
+                                       "translations"=>"AAA"
+                                     );
+error_log("return rows: " . json_encode($q_rows));
+
+                        return $q_rows;
+                        break;
+
+                    case 'apply_translation_with_server':
+
+                        $term_ids = esc_sql($_POST['term_id']);
+
+                        foreach ($term_ids as $term_id) {
+                        }
+
+                        return;
+                        break;
+
+                    default:
+                        // do nothing or something else
+                        return;
+                        break;
+                }
+            }
+
+error_log("return rows: " . json_encode($q_rows));
+
+            return(array( "name_str"=>"wordpres-dddeeeee",
+                                       "title"=>"BBB Labeleeee",
+                                       "translations"=>"AAA"
+                                     ));
+
+
+
+        }
         public function tmy_translation_taxonomy_table_action() {
 
             //         echo '<div class="notice notice-success is-dismissible"><p> bulk action 456</p></div>';
@@ -1396,6 +1459,13 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                         });
                     }
 
+                    function G11nmyDashboardSubmitChanges() {
+
+                        var div = document.getElementById('tmy_dashboard_bumit_status');
+                        div.innerHTML = "<div class=\"tmy_loader\"></div>   Connecting to server ....";
+
+                    }
+
                     function G11nmyGetServerStatus() {
                         var div = document.getElementById('tmy_server_status');
                         div.innerHTML = "<div class=\"tmy_loader\"></div>   Connecting to server ....";
@@ -1477,6 +1547,39 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
         	    echo '</div>';
 
 
+            $tmy_g11n_dir = dirname( __FILE__ );
+            require_once "{$tmy_g11n_dir}/include/class-tmy-g11n-table.php";
+
+            //ob_start();
+
+            echo '<form method="post">';
+            $table = new TMY_G11N_Dashboard_Sync_Table();
+            ?>
+            <br>
+            <label for="bulk-action-selector-top" class="screen-reader-text">Select Action</label>
+            <select name="action" id="bulk-action-selector-top">
+                   <option value="sync_translation_server_list">Sync with Translation Sever</option>
+                   <option value="apply_translation_with_server">Download and Apply Translation</option>
+            </select>
+
+            <input type="submit" name="submit" id="dashboard_submit" 
+                                 class="button button-primary" 
+                                 onclick="G11nmyDashboardSubmitChanges()" 
+                                 value="Apply"  /> &nbsp; <div id="tmy_dashboard_bumit_status" style="display:inline-block; vertical-align: middle;"></div><br>
+            <?php
+            //$table->process_bulk_action = $this->tmy_translation_dashboard_table_action();
+            //$table->process_bulk_action();
+            $table->prepare_items();
+            $table->display();
+            echo '</form>';
+
+            //$table_html = ob_get_contents();
+            //ob_end_clean();
+
+
+           //echo $table_html;
+
+
                }
 
         }
@@ -1500,7 +1603,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                  - Translatio plugin version<br>
                  - Default theme<br>
                  - Some system options that can impact how the plugin may be functioning<br><br>
-                 If you need further assistance to trouble shoot your site, please review the below diagnostic information to ensure there is no sensitive information included, click copy and email it to <a href="mailto:yu.shao.gm@gmail.com">yu.shao.gm@gmail.com</a> in email.', 'tmy-globalization') ?>
+                 If you need further assistance to trouble shoot your site, please review the below diagnostic information to ensure there is no sensitive information included, click copy and email it to <a href="mailto:support@translatio.io">support@translatio.io</a> in email.', 'tmy-globalization') ?>
 		  <br>
 		  <br>
 		    <button onclick="g11ncopysysteminfotext()"><?php esc_html_e('Copy Text', 'tmy-globalization') ?></button>
@@ -2399,6 +2502,8 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                 }
 
                 echo tmy_g11n_html_kses_esc($return_msg);
+
+
 		wp_die();
 
         }
@@ -2793,6 +2898,13 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                  0% { transform: rotate(0deg); }
                  100% { transform: rotate(360deg); }
                }
+               </style>
+               <style type="text/css">
+               .wp-list-table .column-dashboard_post_id { text-align: left; width:100px !important; overflow:hidden }
+               .wp-list-table .column-dashboard_language { text-align: left; width:80px !important; overflow:hidden }
+               .wp-list-table .column-dashboard_language_ready { text-align: left; width:60px !important; overflow:hidden }
+               .wp-list-table .column-dashboard_trans_post_id { text-align: left; width:100px !important; overflow:hidden }
+               .wp-list-table .column-dashboard_dashboard_last_modified { text-align: left; width:100px !important; overflow:hidden }
                </style>
              <?php
 

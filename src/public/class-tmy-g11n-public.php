@@ -1089,7 +1089,8 @@ public function g11n_add_floating_menu() {
 
 	public function g11n_content_filter($input) {
 
-                    if (! ( is_admin() || defined( 'REST_REQUEST' ) && REST_REQUEST )) {
+                    if ((! ( is_admin() || defined( 'REST_REQUEST' ) && REST_REQUEST )) &&
+                        (strcmp(get_current_theme(), "Avada") !== 0)) {
 
 		        global $wp_query; 
 
@@ -1126,21 +1127,21 @@ public function g11n_add_floating_menu() {
 			//    //return "Translation of cts: " . $input;
 		        //}
 
-			// don't update contents here but in the posts_filter, compatibility with Avada 15 Dec 2023
-			//
-		        // $language_options = get_option('g11n_additional_lang');
-		        // $g11n_current_language = tmy_g11n_lang_sanitize($_SESSION['g11n_language']);
-		        // $language_name = $language_options[$g11n_current_language];
-		        // //$translation_post_id = $this->translator->get_translation_id($postid,$language_name,$posttype);
+			 //don't update contents here but in the posts_filter, compatibility with Avada 15 Dec 2023
+			
+		         $language_options = get_option('g11n_additional_lang');
+		         $g11n_current_language = tmy_g11n_lang_sanitize($_SESSION['g11n_language']);
+		         $language_name = $language_options[$g11n_current_language];
+		         //$translation_post_id = $this->translator->get_translation_id($postid,$language_name,$posttype);
 
-		        // $translation_post_id = $this->translator->get_translation_id($postid,$language_name,$posttype,false);
+		         $translation_post_id = $this->translator->get_translation_id($postid,$language_name,$posttype,false);
 
-                        // if ( WP_TMY_G11N_DEBUG ) {
-		        //     error_log("In g11n_content_filter original post id = " . esc_attr($postid) . ".");
-		        //     error_log("In g11n_content_filter language = " . esc_attr($language_name) . ".");
-		        //     error_log("In g11n_content_filter type = " . esc_attr($posttype) . ".");
-		        //     error_log("In g11n_content_filter translation_post_id = " . esc_attr($translation_post_id) . ".");
-                        // }
+                         if ( WP_TMY_G11N_DEBUG ) {
+		             error_log("In g11n_content_filter original post id = " . esc_attr($postid) . ".");
+		             error_log("In g11n_content_filter language = " . esc_attr($language_name) . ".");
+		             error_log("In g11n_content_filter type = " . esc_attr($posttype) . ".");
+		             error_log("In g11n_content_filter translation_post_id = " . esc_attr($translation_post_id) . ".");
+                         }
 
 		        if(strcmp(get_option('g11n_switcher_post'),"Yes")==0){
 			    $switcher_html = $this->translator->get_language_switcher('content');
@@ -1148,13 +1149,14 @@ public function g11n_add_floating_menu() {
 			        $switcher_html = "";
 		        }
     
-		        // if (isset($translation_post_id)) {
-			//     return wpautop(get_post_field("post_content", $translation_post_id)) . "<br>" . $switcher_html;
-		        // } else {
-			//     return $input . "<br>" . $switcher_html;
-		        // }
-			return $input . "<br>" . $switcher_html;
+		         if (isset($translation_post_id)) {
+			     return wpautop(get_post_field("post_content", $translation_post_id)) . "<br>" . $switcher_html;
+		         } else {
+			     return $input . "<br>" . $switcher_html;
+		         }
+			//return $input . "<br>" . $switcher_html;
                     }
+		    return $input;
 	}
 
 	public function g11n_title_filter( $title, $id = 0 ) {
@@ -1455,8 +1457,8 @@ public function g11n_add_floating_menu() {
             if (($option === "woocommerce_cheque_settings") || ($option === "woocommerce_cod_settings")) {
                 $language_options = get_option('g11n_additional_lang');
                 $g11n_current_language = $this->translator->get_preferred_language();
-                if (! is_null($language_otpions)) {
-                    $language_otpions = array();
+                if (! is_null($language_options)) {
+                    $language_options = array();
 error_log(" 1307 1307 : " . json_encode($language_options));
                     $lang = $language_options[$g11n_current_language];
 
