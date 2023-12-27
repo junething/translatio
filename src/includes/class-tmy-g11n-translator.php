@@ -191,8 +191,20 @@ class TMY_G11n_Translator {
                     error_log("set language push doc to server: ". $pref_lang);
 
 		    $payload_contents_array = array();
+                    $md5index = array();
 		    foreach ($contents_array as &$con) {
 		        $con_id = md5($con);
+                        $max_adj = 0;
+                        while (in_array($con_id, $md5index)) {
+                            $max_adj = $max_adj + 1;
+                            if ($max_adj > 20) {
+                                error_log("md5index maximum 20");
+                                break;
+                            }
+                            $con = $con . " ";
+		            $con_id = md5($con);
+                        }
+                        $md5index[] = $con_id;
 		        array_push($payload_contents_array, array("extensions" => array(array("object-type" => "pot-entry-header",
 				                                        "references" => array(),
 				                                        "flags" => array(),
