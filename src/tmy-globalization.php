@@ -16,7 +16,7 @@
  * Plugin Name:       Translatio
  * Plugin URI:        https://github.com/translatio-io/translatio
  * Description:       Translating your application into other languages.
- * Version:           1.9.6
+ * Version:           1.9.7
  * Author:            Yu Shao
  * Author URI:        https://github.com/translatio-io
  * License:           GPL-2.0+
@@ -34,8 +34,8 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'TMY_G11N_VERSION', '1.9.6' );
-define( 'WP_TMY_G11N_DEBUG', true );
+define( 'TMY_G11N_VERSION', '1.9.7' );
+define( 'WP_TMY_G11N_DEBUG', false );
 
 /**
  * The code that runs during plugin activation.
