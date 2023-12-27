@@ -211,8 +211,8 @@ class TMY_G11n_Translator {
 				                                        "context" => "")),
                                                         //Dec 2023, change to using default language
 				                        //"lang" => "en-US",
-				                        "lang" => "zh-CN",
-				                        //"lang" => $pref_lang,
+				                        //"lang" => "zh-CN",
+				                        "lang" => $pref_lang,
 				                        "id" => "$con_id",
 				                        "plural" => false,
 				                        "content" => "$con"
