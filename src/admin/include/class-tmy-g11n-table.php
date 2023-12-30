@@ -447,9 +447,9 @@ public function __construct() {
         public function get_columns() {
             return array(
                 'cb'  => '<input type="checkbox" />',
-                'dashboard_name_str'   => __('Document', 'tmy-globalization'),
+                'dashboard_name_str'   => __('Original Document', 'tmy-globalization'),
                 'dashboard_title'   => __('Title', 'tmy-globalization'),
-                'dashboard_post_id'   => __('Post ID', 'tmy-globalization'),
+                'dashboard_post_id'   => __('Original Post ID', 'tmy-globalization'),
                 'dashboard_language'   => __('Language', 'tmy-globalization'),
                 'dashboard_language_ready'   => __('Ready', 'tmy-globalization'),
                 'dashboard_trans_post_id'   => __('Translation Post ID', 'tmy-globalization'),
@@ -538,7 +538,9 @@ public function __construct() {
                                             }
                                             $post_last_modified = get_post_field('post_modified', $default_lang_post_id);
                                             $qualified_rows[] = array( 
-                                                "post_id"=>$default_lang_post_id,
+                                                "post_id"=>'<a href="' . esc_url(get_edit_post_link(esc_attr($default_lang_post_id))) .
+                                                      '" target="_blank">'.esc_attr($default_lang_post_id) . '</a>',
+                                                           // $default_lang_post_id,
                                                 "post_index"=>$post_index,
                                                 "trans_post_id"=>$trans_post_str,
                                                 "translation_ready"=>$trans_ready_str,
@@ -669,9 +671,13 @@ public function __construct() {
                                                      $this->translator->_update_g11n_translation_status($translation_id);
 
                                                      $qualified_rows[] = array( 
-                                                        "post_id"=>$default_lang_post_id,
+                                                        //"post_id"=>$default_lang_post_id,
+                                                        "post_id"=>'<a href="' . esc_url(get_edit_post_link(esc_attr($default_lang_post_id))) .
+                                                                   '" target="_blank">'.esc_attr($default_lang_post_id) . '</a>',
                                                         "post_index"=>$default_lang_post_id,
-                                                        "trans_post_id"=>$translation_id,
+                                                        //"trans_post_id"=>$translation_id,
+                                                        "trans_post_id"=>'<a href="' . esc_url(get_edit_post_link(esc_attr($translation_id))) .
+                                                                   '" target="_blank">'.esc_attr($translation_id) . '</a>',
                                                         "translation_ready"=>"&#10004;",
                                                         "name_str"=>$row->id,
                                                         "title"=>get_the_title($translation_id),
@@ -748,7 +754,7 @@ public function __construct() {
                 case 'dashboard_name_str':
                     return esc_html( $item["name_str"] );
                 case 'dashboard_post_id':
-                    return esc_html( $item["post_id"] );
+                    return $item["post_id"];
                 case 'dashboard_title':
                     return esc_html( $item["title"] );
                 case 'dashboard_language':

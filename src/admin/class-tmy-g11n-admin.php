@@ -1533,16 +1533,17 @@ error_log("return rows: " . json_encode($q_rows));
                     <?php
                     echo "<a href ='" . $machine_trans_url . "' target='_blank' >" . $machine_trans_url . "</a>";
                     echo '<br>';
-                    echo '<br>';
-                    echo '<br>';
-                    echo '<button type="button" onclick="G11nmyGetServerStatus()">Click This Button To Sync with Translation Server</button> ';
-                    echo '<br>';
+                    //echo '<br>';
+                    //echo '<br>';
+                    //echo '<button type="button" onclick="G11nmyGetServerStatus()">Click This Button To Sync with Translation Server</button> ';
+                    //echo '<br>';
                     echo "<br>Translation Server: ". esc_attr(get_option('g11n_server_url')) . '<br> ';
                     echo "Project: <b>" . esc_attr(get_option('g11n_server_project')). "</b> ";
                     echo "Version: <b>" . esc_attr(get_option('g11n_server_version')) . "</b><br>";
                     $rest_url = rtrim(get_option('g11n_server_url'),"/") .  "/rest/version";
                     $server_reply = $this->translator->rest_get_translation_server($rest_url);
                     echo "Server Version: " . esc_attr($server_reply["payload"]->versionNo) . "<br><br>";
+                    echo '<br>Choose Action <b>Sync with Translation Server</b> to get the status from Translation Sever<br>Choose Acton <b>Download and Apply Translation</b> to download the translation to Wordpress locally<br>';
         	    echo '<div id="tmy_server_status">';
         	    echo '</div>';
 
@@ -1853,7 +1854,11 @@ error_log("return rows: " . json_encode($q_rows));
             $post_id = intval($_POST['id']);
             $post_type = sanitize_text_field($_POST['post_type']);
 
-	    $response = json_decode($this->_tmy_create_sync_translation($post_id, $post_type));
+            $response = json_decode($this->_tmy_create_sync_translation($post_id, $post_type));
+
+            //check dependencies that need to start as well
+            $dep_message = $this->_tmy_create_sync_dep_translation($post_id);
+            $response->message = $response->message . " " . $dep_message;
 
 	    echo json_encode(array("message" => esc_html($response->message),
                                    "div_status" => tmy_g11n_html_kses_esc($response->div_status))
@@ -1862,6 +1867,40 @@ error_log("return rows: " . json_encode($q_rows));
 
         }
 
+	public function _tmy_create_sync_dep_translation($post_id) {
+
+            if ((strcmp(get_current_theme(), "Avada") === 0)) {
+                $dep_list = array();
+                $dep_queue = array();
+                $dep_queue[] = $post_id;
+                while (count($dep_queue) > 0) {
+                    $dep_post_id = array_shift($dep_queue);
+                    $dep_post_content = get_post_field('post_content', $dep_post_id);
+                    $pattern = "/fusion_global id=\"([^\]]*)\"/";
+                    preg_match_all($pattern, $dep_post_content, $dep_matches);
+                    foreach ($dep_matches[1] as $global_id) {
+                        if (! in_array($global_id, $dep_queue)) {
+                            $dep_queue[] = $global_id;
+                        }
+                    }
+                    $dep_list[] = $dep_post_id;
+                }
+                $main_post_key = array_search($post_id, $dep_list);
+                if (false !== $main_post_key) {
+                    unset($dep_list[$main_post_key]);
+                }
+                error_log("depchecking... " . print_r($dep_list,true));
+                $dep_message = " Notice: " . implode(" ", $dep_list) . " need(s) translation are also created: ";
+                foreach ($dep_list as $global_id) {
+                    $dep_post_type = get_post_field('post_type', $global_id);
+                    $dep_response = json_decode($this->_tmy_create_sync_translation($global_id, $dep_post_type));
+                    $dep_message = $dep_message . esc_html($dep_response->message) . "<br>";
+                }
+                return $dep_message;
+            }
+
+
+        }
 	public function _tmy_create_sync_translation($post_id, $post_type) {
 
             $message = "Number of translation entries created for " . $post_id . ": ";
@@ -1913,6 +1952,7 @@ error_log("return rows: " . json_encode($q_rows));
                                  add_post_meta( $new_translation_id, 'orig_post_id', $post_id, true );
                                  add_post_meta( $new_translation_id, 'g11n_tmy_lang', $code, true );
                                  add_post_meta( $new_translation_id, 'g11n_tmy_orig_type', $post_type, true );
+                                 //$message .= " " . $new_translation_id . " ";
                              }
                              $this->_update_g11n_translation_status($new_translation_id);
                              if ( WP_TMY_G11N_DEBUG ) { 
@@ -2850,6 +2890,9 @@ error_log("return rows: " . json_encode($q_rows));
 	       $post_result = $this->_tmy_create_sync_translation($post_id, $post_type);
 	       $post_result_var = json_decode($post_result);
                $result .= $post_result_var->message ."<br>";
+
+               $dep_message = $this->_tmy_create_sync_dep_translation($post_id);
+               $result .= " " . $dep_message;
                //error_log($post_result);
             }
             $result .= "<br>";
@@ -2859,6 +2902,24 @@ error_log("return rows: " . json_encode($q_rows));
         }
 
         function tmy_plugin_g11n_admin_notice() {
+
+            if ((strcmp(get_current_theme(), "Avada") === 0) && (strcmp($_GET["page"], "avada-library") === 0)) {
+               $message_for_avada_page= __('Visit', 'tmy-globalization'). ' <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=fusion_element' . 
+                               '">' . __('here ', 'tmy-globalization') . '</a> ' . 
+                               __('for translation bulk actions for Avada Elements.', 'tmy-globalization');
+            ?>
+	        <div class="updated notice is-dismissible">
+                     <br>
+                         <h2> <img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translatio', 'tmy-globalization') ?></h2><br>
+
+                         <?php
+                              echo $message_for_avada_page;
+                         ?>
+                         <br>
+                         <br>
+	        </div>
+            <?php 
+            }
 
 	    if( ! empty( $_REQUEST[ 'start_sync_tranlations' ] ) ) {
 	        ?>
@@ -2953,7 +3014,10 @@ error_log("return rows: " . json_encode($q_rows));
                                  <input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="tmy-<?php echo esc_attr($value); ?>" /> <?php echo esc_attr($key); echo " " . esc_attr($lang_native); ?>
                             </label>
                                  <input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
+                   <!--
                                  <input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_attr($key); echo " " . esc_attr($lang_native); ?>" />
+                     -->
+                                 <input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_attr($lang_native); ?>" />
                                  <input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" 
                                      value="<?php echo site_url(); ?>/?tmy_dynamic_url=<?php echo esc_attr($lang_path); ?>" />
                                  <input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />

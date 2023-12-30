@@ -886,6 +886,34 @@ public function g11n_add_floating_menu() {
 
 	        return $in;
 	}
+
+        public function g11n_ext_menumeta_filter($avada_meta, $item_id) {
+
+                if (isset( $avada_meta['select'] ) && ( $avada_meta['select'] != '' ) && ( $avada_meta['select'] != 0 )) {
+                     $item_post_type = get_post_type($item_id);
+                    if ( strcmp($item_post_type,"nav_menu_item")==0 ) {
+                         $g11n_current_language = $this->translator->get_preferred_language();
+                         $language_options = get_option('g11n_additional_lang');
+                         $language_name = $language_options[$g11n_current_language];
+
+                         $translation_post_id = $this->translator->get_translation_id($avada_meta['select'],
+                                                                                 $language_name,
+                                                                                 "fusion_element",
+                                                                                 false);
+
+                         if ( WP_TMY_G11N_DEBUG ) {
+                             error_log("g11n_ext_menumeta_filter avada megamenu: ID " . $item_id. " " . $item_post_type . " " . $language_name);
+                             error_log("g11n_ext_menumeta_filter avada megamenu: select " . $avada_meta['select']);
+                             error_log("g11n_ext_menumeta_filter avada megamenu: transid " . $translation_post_id);
+                             //error_log("g11n_ext_menumeta_filter avada megamenu: meta " . json_encode($avada_meta));
+                         }
+                         if (isset($translation_post_id)) {
+                             $avada_meta['select']=$translation_post_id;
+                         }
+                    }
+                }
+                 return $avada_meta;
+        }
 	
 	public function g11n_ext_translator_filter($post_id, $post_type, $ext1 = false, $ext2 = null) {
 
