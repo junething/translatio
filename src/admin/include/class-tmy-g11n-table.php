@@ -238,6 +238,35 @@ public function __construct() {
                                             );
 
             }
+
+	    // find all Avada menu highlight text
+	    $sql = "select meta_value from {$wpdb->prefix}postmeta where meta_key=\"_menu_item_fusion_megamenu\"";
+            $rows = $wpdb->get_results( $sql, "ARRAY_A" );
+
+            foreach ($rows as $row) {
+		   $meta_value_var=unserialize($row["meta_value"]);
+	           if (isset( $meta_value_var['highlight_label'] ) && ( $meta_value_var['highlight_label'] != '' )) {
+                       $qualified_rows[] = array( "text_str"=>wp_trim_words($meta_value_var['highlight_label']),
+                                              "taxonomy"=>"Avada Menu Highlight Label",
+                                              "translations"=>""
+                                            );
+		   }
+            }
+
+	    // find all Avada subtitle page
+            $sql = "select meta_value from {$wpdb->prefix}postmeta where meta_key=\"Subtitle Page\"";
+            $rows = $wpdb->get_results( $sql, "ARRAY_A" );
+
+            foreach ($rows as $row) {
+			   error_log("SUBTITLE: " . json_encode($row));
+                   if (isset( $row['meta_value'] ) && ( $row['meta_value'] != '' )) {
+                       $qualified_rows[] = array( "text_str"=>wp_trim_words($row['meta_value']),
+                                              "taxonomy"=>"Avada Subtitle Page",
+                                              "translations"=>""
+                                            );
+                   }
+            }
+
      
             // find all woo commerce product attributes
             $sql = "select distinct attribute_label 

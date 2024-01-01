@@ -313,6 +313,7 @@ class TMY_G11n {
 		$this->loader->add_filter( 'wpml_object_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
 		$this->loader->add_filter( 'fusion_layout_section_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
                 $this->loader->add_filter( 'avada_menu_meta', $plugin_public, 'g11n_ext_menumeta_filter', 10, 2 );
+                $this->loader->add_filter( 'fusion_shortcode_content', $plugin_public, 'g11n_fusion_shortcode_content_filter', 999, 3 );
 
 		$this->loader->add_filter( 'pre_option_blogname', $plugin_public, 'g11n_pre_get_option_blogname',10, 2);
 		$this->loader->add_filter( 'pre_option_blogdescription', $plugin_public, 'g11n_pre_get_option_blogdescription',10, 2);
