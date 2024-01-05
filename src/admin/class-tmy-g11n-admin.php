@@ -1509,6 +1509,14 @@ error_log("return rows: " . json_encode($q_rows));
 
                 //echo "</div>";
            
+		echo "<h2>" . __('Local Translation Status', 'tmy-globalization') . ":</h2>";
+		$local_trans_stats = (array)wp_count_posts("g11n_translation");
+		$local_trans_str = "Published: " . $local_trans_stats["publish"] . ", " .
+		                   "Draft: " . $local_trans_stats["draft"] . "<br>" .
+		          __('Visit', 'tmy-globalization'). ' <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=g11n_translation' .
+                               '">' . __('Translatio Translations', 'tmy-globalization') . '</a> ' . __('for all translations', 'tmy-globalization');
+
+		echo __('Number of Translation items: ', 'tmy-globalization') . $local_trans_str . "<br>";
 		echo "<h2>" . __('Translation Server Status', 'tmy-globalization') . ":</h2>";
 
                 if ((strcmp('', get_option('g11n_server_user','')) === 0) || (strcmp('', get_option('g11n_server_token','')) === 0)) {
@@ -3085,8 +3093,12 @@ error_log("return rows: " . json_encode($q_rows));
                    $home_root = '/';
                 }
                 $all_langs = get_option('g11n_additional_lang', array());
-                $rewrite_rules = strtolower(implode("|", $all_langs));
-                $rewrite_rules = str_replace('_', '-', $rewrite_rules);
+		if (is_array($all_langs)) {
+                    $rewrite_rules = strtolower(implode("|", $all_langs));
+                    $rewrite_rules = str_replace('_', '-', $rewrite_rules);
+		} else {
+                    $rewrite_rules = " ";
+		}
     
                 $content = array(
                     '<IfModule mod_rewrite.c>',

@@ -500,6 +500,7 @@ public function __construct() {
                 error_log("prepare items acton page action =" . $_POST['action']);
 
             $this->items = array();
+            $qualified_rows = array();
 
             if ( isset( $_POST['action']) && strcmp(esc_attr($_POST['action']), "sync_translation_server_list")==0  || ($this->get_pagenum() > 1)) {
                 error_log("prepare items acton set - " . esc_attr($_POST['action']));
@@ -625,7 +626,6 @@ public function __construct() {
                                     $payload_post_type = $g11n_res_filename[1];
                                     $default_post_title =  get_the_title($default_lang_post_id);
                                     $default_post_title =  substr($default_post_title, 0 , 30);
-
                                     if ( strcmp($g11n_res_filename[0], "WordpressG11nAret") === 0 ) {
                                         foreach ( $row->stats as $stat_row ) {
                                             $tmy_local_locale = str_replace("-", "_", $stat_row->locale);
@@ -733,7 +733,7 @@ public function __construct() {
             error_log("after switch ");
 
 
-            $per_page = 100;
+            $per_page = 600;
             $current_page = $this->get_pagenum();
             $total_items = count($this->items);
 
