@@ -1277,6 +1277,25 @@ public function g11n_add_floating_menu() {
 
 	}
 
+        public function g11n_pre_get_document_title_filter( $title ) {
+
+            $post_id = get_the_ID();
+            if ($post_id) {
+                    error_log("SHAO PRE title: " . $title . " " . $post_id );
+                $post_type = get_post_type($post_id);
+                $language_options = get_option('g11n_additional_lang');
+                $g11n_current_language = $this->translator->get_preferred_language();
+                $language_name = $language_options[$g11n_current_language];
+                $translation_post_id = $this->translator->get_translation_id($post_id,$language_name,$post_type,false);
+                if (isset($translation_post_id)) {
+                    return get_post_field("post_title", $translation_post_id) . " - " . get_bloginfo("name");
+                }
+            }
+            return $title;
+
+        }
+
+
 	public function g11n_wp_title_filter( $output, $show ) {
 
                     if ( WP_TMY_G11N_DEBUG ) {

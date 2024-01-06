@@ -584,13 +584,13 @@ class TMY_G11n_Translator {
                 }
 
                 // error_log(" In get_preferred_language session status :". session_status() . " is_admin:" . is_admin());
-                //if (session_status() !== PHP_SESSION_ACTIVE) { 
-                //    session_start();
-                //}
+                if (session_status() !== PHP_SESSION_ACTIVE) { 
+                    session_start();
+                }
 
-                //if (! isset($_SESSION)) {
-                //    session_start();
-                //}
+                if (! isset($_SESSION)) {
+                    session_start();
+                }
                 $seq_code = mt_rand(1000,9999);
 
                 if ( WP_TMY_G11N_DEBUG ) {

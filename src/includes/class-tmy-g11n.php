@@ -302,6 +302,8 @@ class TMY_G11n {
 		//$this->loader->add_filter( 'widget_title', $plugin_public, 'g11n_widget_title', 10, 2 );
 		$this->loader->add_action(  'wp_footer', $plugin_public, 'g11n_add_floating_menu' );
 
+		$this->loader->add_filter( 'pre_get_document_title', $plugin_public, 'g11n_pre_get_document_title_filter', 999, 1 );
+
                 $this->loader->add_filter( 'bloginfo', $plugin_public, 'g11n_wp_title_filter', 10, 2 );
 		$this->loader->add_filter( 'the_title', $plugin_public, 'g11n_title_filter', 10, 2 );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'g11n_content_filter' );
