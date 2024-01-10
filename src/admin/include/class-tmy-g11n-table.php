@@ -258,7 +258,6 @@ public function __construct() {
             $rows = $wpdb->get_results( $sql, "ARRAY_A" );
 
             foreach ($rows as $row) {
-			   error_log("SUBTITLE: " . json_encode($row));
                    if (isset( $row['meta_value'] ) && ( $row['meta_value'] != '' )) {
                        $qualified_rows[] = array( "text_str"=>wp_trim_words($row['meta_value']),
                                               "taxonomy"=>"Avada Subtitle Page",
@@ -267,7 +266,45 @@ public function __construct() {
                    }
             }
 
-     
+            // find all avada fusion_tb_section
+            $sql = 'select ID, post_title, post_content from wp_posts where 
+                    post_type="fusion_tb_section"';
+            $rows = $wpdb->get_results( $sql, "ARRAY_A" );
+
+            foreach ($rows as $row) {
+                $pattern = '/\[fusion_title(.*?)\](.*?)\[\/fusion_title\]/is';
+                preg_match_all($pattern, $row["post_content"], $f_title_matches);
+                foreach ($f_title_matches[2] as $f_title) {
+                $f_title = str_replace(array("\r\n", "\r", "\n"), "<br />", trim($f_title));
+                $f_title = htmlentities(html_entity_decode($f_title));
+                $f_title = str_replace('-', '–', $f_title);
+                   $qualified_rows[] = array( "text_str"=>$f_title,
+                                              "taxonomy"=>"Avada Fusion Title",
+                                              "translations"=>""
+                                            );
+                }
+
+                $pattern = '/\[fusion_text[^\]]*dynamic_params="([^"]*)"[^\]]*\]/';
+                preg_match_all($pattern, $row["post_content"], $matches);
+                if (is_array($matches[1])) {
+                    foreach ($matches[1] as $contents) {
+                        $dp_var = json_decode(base64_decode($contents, true), true);
+                        //$dp_text = addslashes(trim($dp_var["element_content"]["after"]));
+                        $dp_text = trim($dp_var["element_content"]["after"]);
+                        $dp_text = htmlentities($dp_text);
+                        //$dp_text = $wpdb->_real_escape($dp_text);
+                        //$dp_text = esc_sql($dp_text);
+                        if (isset($dp_var["element_content"]["data"]) && (strcmp($dp_var["element_content"]["data"], "date")===0)) {
+                            $qualified_rows[] = array( "text_str"=>$dp_text,
+                                              "taxonomy"=>"Avada Fusion Text Dynamic Content",
+                                              "original_str"=>trim($dp_var["element_content"]["after"]),
+                                              "translations"=>""
+                                            );
+                        }
+                    }
+                } 
+            }
+
             // find all woo commerce product attributes
             $sql = "select distinct attribute_label 
                              from {$wpdb->prefix}woocommerce_attribute_taxonomies";
@@ -326,7 +363,13 @@ public function __construct() {
 
             // checking if the private post has been created and if translation started
             foreach ($qualified_rows as &$row) {
-                $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($row["text_str"]) . "\" and post_status=\"private\"";
+
+                if (strcmp($row["taxonomy"], "Avada Fusion Text Dynamic Content")===0) {
+                    $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . htmlentities($row["original_str"]) . "\" and post_status=\"private\"";
+                } else {
+                    $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($row["text_str"]) . "\" and post_status=\"private\"";
+                }
+                //$sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . br2nl($row["text_str"]) . "\" and post_status=\"private\"";
                 $result = $wpdb->get_results($sql);
                 if (isset($result[0]->ID)) {
 
@@ -412,7 +455,8 @@ public function __construct() {
         protected function column_default( $item, $column_name ) {
             switch ( $column_name ) {
                 case 'text_str':
-                    return esc_html( $item["text_str"] );
+                    //return esc_html( $item["text_str"] );
+                    return  $item["text_str"] ;
                 case 'taxonomy':
                     return esc_html( $item["taxonomy"] );
                 case 'place_holder_id':

@@ -891,18 +891,57 @@ public function g11n_add_floating_menu() {
 
         public function g11n_fusion_shortcode_content_filter($content, $type, $args) {
 
+            if (strcmp($type, "fusion_title")===0) {
+                //error_log("g11n_fusion_shortcode_content_filter content: " . $content . " " . $type );
+                $content_br = html_entity_decode(str_replace(array("\r\n", "\r", "\n"), "<br />", trim($content)),);
+                $content_br_html = htmlspecialchars(esc_sql($content_br));
+                $language_options = get_option('g11n_additional_lang');
+                $g11n_current_language = $this->translator->get_preferred_language();
+                if (! is_null($language_options)) {
+                    $lang = $language_options[$g11n_current_language];
+
+                    global $wpdb;
+                    $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($content_br_html) . "\" and post_status=\"private\"";
+                    $result = $wpdb->get_results($sql);
+                    if (isset($result[0]->ID)) {
+                        $translation_post_id = $this->translator->get_translation_id($result[0]->ID, $lang, "post", true);
+                        if (isset($translation_post_id)) {
+                            //$translation_str = html_entity_decode(get_post_field("post_content", $translation_post_id));
+                            $translation_str = get_post_field("post_content", $translation_post_id);
+                            $translation_str = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $translation_str);
+                            $translation_str = html_entity_decode(trim($translation_str));
+                            //$translation_str = preg_replace('/\<br(\s*)?\/?\>/i', "\r\n", $translation_str);
+                            return $translation_str;
+                        }
+                        //error_log("g11n_fusion_shortcode_content_filter content after text translator id: " . $translation_post_id);
+                        //error_log("g11n_fusion_shortcode_content_filter content after text translator: " . $translation_str);
+                    }
+                }
+                return $content;
+            }
 
             if ((strcmp($type, "fusion_text")===0) && isset($args["dynamic_params"])) {
 
+                error_log("g11n_fusion_shortcode_content_filter content: " . $type . " " . $content );
                 $dp_var = json_decode(base64_decode($args["dynamic_params"]), true);
+                $language_options = get_option('g11n_additional_lang');
+                $g11n_current_language = $this->translator->get_preferred_language();
+                $lang = $language_options[$g11n_current_language];
+
                 if (isset($dp_var["element_content"]["key"]) && (strcmp($dp_var["element_content"]["key"], "Subtitle Page")===0)) {
                     //error_log("g11n_fusion_shortcode_content_filter content: " . $content);
                     //error_log("g11n_fusion_shortcode_content_filter key: " . $dp_var["element_content"]["key"]);
 
-                    $language_options = get_option('g11n_additional_lang');
-                    $g11n_current_language = $this->translator->get_preferred_language();
-                    $lang = $language_options[$g11n_current_language];
                     return $this->tmy_text_translator( $content, $lang);
+                }
+
+                if (isset($dp_var["element_content"]["data"]) && (strcmp($dp_var["element_content"]["data"], "date")===0)) {
+                    $orig_content = htmlentities(trim($dp_var["element_content"]["after"]));
+                    //error_log(" TRANSLATION : " . $this->tmy_text_translator( $orig_content, $lang));
+                    return  $dp_var["element_content"]["before"] .
+                            wp_date($dp_var["element_content"]["format"]) . " " .
+                            html_entity_decode($this->tmy_text_translator( $orig_content, $lang));
+
                 }
             }
             return $content;
@@ -1045,9 +1084,9 @@ public function g11n_add_floating_menu() {
 
 	            foreach ( $posts as $post ) {
 
-                        if ( WP_TMY_G11N_DEBUG ) {
+                        //if ( WP_TMY_G11N_DEBUG ) {
                             error_log("In g11n_the_posts_filter, post_id: " . esc_attr($post->ID) . " post_type: " . esc_attr($post->post_type));
-                        }
+                        //}
 		        if ( tmy_g11n_is_valid_post_type($post->post_type) && (strcmp($post->post_type,"fusion_tb_section")==0)) {
 
                             $g11n_current_language = $this->translator->get_preferred_language();
@@ -1057,11 +1096,11 @@ public function g11n_add_floating_menu() {
                                                                                          $language_name,
                                                                                          $post->post_type,
                                                                                          false);
-                            if ( WP_TMY_G11N_DEBUG ) {
+                            //if ( WP_TMY_G11N_DEBUG ) {
                                 error_log("fusion_tb_section In g11n_the_posts_filter, excerpt post_id: " . esc_attr($post->ID) . " language: " . esc_attr($language_name));
                                 error_log("fusion_tb_section In g11n_the_posts_filter, translation_id:  " . esc_attr($translation_post_id));
                                 error_log("fusion_tb_section In g11n_the_posts_filter, SESSION:  " . esc_attr($_SESSION['g11n_language']));
-                            }
+                            //}
                             if (isset($translation_post_id)) {
                                 $post->post_content=wpautop(get_post_field("post_content", $translation_post_id));
                             }
@@ -1281,7 +1320,6 @@ public function g11n_add_floating_menu() {
 
             $post_id = get_the_ID();
             if ($post_id) {
-                    error_log("SHAO PRE title: " . $title . " " . $post_id );
                 $post_type = get_post_type($post_id);
                 $language_options = get_option('g11n_additional_lang');
                 $g11n_current_language = $this->translator->get_preferred_language();
