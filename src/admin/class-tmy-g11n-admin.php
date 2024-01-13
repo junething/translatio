@@ -1877,6 +1877,8 @@ error_log("return rows: " . json_encode($q_rows));
 
 	public function _tmy_create_sync_dep_translation($post_id) {
 
+            $dep_message = "";
+
             if ((strcmp(get_current_theme(), "Avada") === 0)) {
                 $dep_list = array();
                 $dep_queue = array();
@@ -1898,15 +1900,73 @@ error_log("return rows: " . json_encode($q_rows));
                     unset($dep_list[$main_post_key]);
                 }
                 error_log("depchecking... " . print_r($dep_list,true));
-                $dep_message = " Notice: " . implode(" ", $dep_list) . " need(s) translation are also created: ";
+                $dep_message = " Checking Avada global containers: " . implode(" ", $dep_list) . " need(s) translation are also created: ";
                 foreach ($dep_list as $global_id) {
                     $dep_post_type = get_post_field('post_type', $global_id);
                     $dep_response = json_decode($this->_tmy_create_sync_translation($global_id, $dep_post_type));
-                    $dep_message = $dep_message . esc_html($dep_response->message) . "<br>";
+                    $dep_message = $dep_message . esc_html($dep_response->message) . " ";
                 }
-                return $dep_message;
             }
 
+            if (is_plugin_active('wordpress-seo/wp-seo.php')) {
+
+                $metadesc_value = get_post_meta($post_id, '_yoast_wpseo_metadesc', True);
+                error_log("check seo installed and active: $post_id " . json_encode($metadesc_value));
+
+                if ( ! empty( $metadesc_value ) ) {
+                    error_log("check seo installed and active YES: $post_id " . json_encode($metadesc_value));
+                    //$metadesc_translation_placeholder = get_post_meta($post_id, '_yoast_wpseo_metadesc_g11n_post_id', True);
+                    global $wpdb;
+                    $result = $wpdb->get_results("select post_id from {$wpdb->prefix}postmeta where 
+                                                         meta_key = '_yoast_wpseo_metadesc_g11n_post_id' and 
+                                                         meta_value = " . $post_id);
+                    if (isset($result[0]->post_id)) {
+                        $metadesc_translation_placeholder = $result[0]->post_id;
+                    }
+
+                    if ( empty( $metadesc_translation_placeholder ) ) {
+                        $metadesc_translation_placeholder = wp_insert_post(
+                              array(
+                                   'post_title'    => esc_attr($metadesc_value),
+                                   'post_content'  => esc_attr($metadesc_value),
+                                   'post_status' => 'private',
+                                   'post_type'  => "post"
+                             ));
+                        add_post_meta( $metadesc_translation_placeholder, 
+                                       '_yoast_wpseo_metadesc_g11n_post_id', 
+                                       $post_id, 
+                                       true );
+                    }
+
+                    $response = json_decode($this->_tmy_create_sync_translation($metadesc_translation_placeholder, "post"));
+
+                    $all_langs = get_option('g11n_additional_lang', array());
+                    $default_lang = get_option('g11n_default_lang');
+                    unset($all_langs[$default_lang]);
+
+                    if (is_array($all_langs)) {
+                         $num_langs = count($all_langs);
+                         foreach( $all_langs as $value => $code) {
+                             $post_type = get_post_type($post_id);
+                             $placeholder_translation_id = $this->translator->get_translation_id($metadesc_translation_placeholder,$code,"post");
+                             $post_translation_id = $this->translator->get_translation_id($post_id,$code,$post_type);
+                             if (isset($placeholder_translation_id) && isset($post_translation_id)) {
+                                 add_post_meta( $post_translation_id, '_yoast_wpseo_metadesc', esc_attr($metadesc_value), true );
+                                 add_post_meta( $placeholder_translation_id, 
+                                                '_yoast_wpseo_metadesc_g11n_post_id', 
+                                                $post_translation_id, 
+                                                true );
+                             }
+                         }
+                    }
+
+                    $dep_message .= "Checking SEO meta description translation, " . esc_html($response->message);
+
+                }
+
+            }
+
+            return $dep_message;
 
         }
 	public function _tmy_create_sync_translation($post_id, $post_type) {

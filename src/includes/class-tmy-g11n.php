@@ -311,7 +311,6 @@ class TMY_G11n {
 		//$this->loader->add_filter( 'get_the_excerpt', $plugin_public, 'g11n_excerpt_filter' );
 		$this->loader->add_filter( 'the_posts', $plugin_public, 'g11n_the_posts_filter' );
 		//$this->loader->add_filter( 'the_post', $plugin_public, 'g11n_the_post_filter', 10, 2 );
-
 		$this->loader->add_filter( 'wpml_object_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
 		$this->loader->add_filter( 'fusion_layout_section_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
                 $this->loader->add_filter( 'avada_menu_meta', $plugin_public, 'g11n_ext_menumeta_filter', 10, 2 );
@@ -360,6 +359,10 @@ class TMY_G11n {
                 $this->loader->add_filter( 'wp_nav_menu_objects', $plugin_public, 'tmy_nav_menu_objects_filter', 10, 2);
 
                 //$this->loader->add_filter( 'nav_menu_link_attributes', $plugin_public, 'tmy_nav_menu_link_attributes_filter', 15, 4);
+
+                if (is_plugin_active('wordpress-seo/wp-seo.php')) {
+		    $this->loader->add_filter( 'wpseo_metadesc', $plugin_public, 'g11n_the_seo_metadesc_filter',10, 2);
+                } 
 	}
 
 	/**

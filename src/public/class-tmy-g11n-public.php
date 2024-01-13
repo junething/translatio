@@ -947,6 +947,31 @@ public function g11n_add_floating_menu() {
             return $content;
         }
 
+        public function g11n_the_seo_metadesc_filter($meta_description, $presentation) {
+
+            if (! empty($meta_description)) {
+                $post_id = get_the_ID();
+                $post_type = get_post_type($post_id);
+                $language_options = get_option('g11n_additional_lang');
+                $g11n_current_language = $this->translator->get_preferred_language();
+                $lang = $language_options[$g11n_current_language];
+                $translation_post_id = $this->translator->get_translation_id($post_id,
+                                                                             $lang,
+                                                                             $post_type,
+                                                                             false);
+                error_log("g11n_the_seo_metadesc_filter: ". $meta_description . " ID: " . $post_id);
+                error_log("g11n_the_seo_metadesc_filter: ". $lang . " ID: " . $translation_post_id);
+                if (isset($translation_post_id)) {
+                    $metadesc_value = get_post_meta($translation_post_id, '_yoast_wpseo_metadesc', True);
+                    if ( ! empty( $metadesc_value ) ) {
+                        error_log("g11n_the_seo_metadesc_filter: ". $metadesc_value);
+                        return $metadesc_value;
+                    }
+                }
+            }
+            return $meta_description;
+
+        }
         public function g11n_ext_menumeta_filter($avada_meta, $item_id) {
 
                 if (isset( $avada_meta['highlight_label'] ) && ( $avada_meta['highlight_label'] != '' )) {
