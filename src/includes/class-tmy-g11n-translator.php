@@ -573,6 +573,141 @@ class TMY_G11n_Translator {
                 }
         }
 
+        //todo copied this to translastor class already, need to sync up if there is any change
+        //Dec 23 2023
+
+	public function _tmy_create_sync_translation($post_id, $post_type) {
+
+            $message = "Number of translation entries created for " . $post_id . ": ";
+
+            $all_langs = get_option('g11n_additional_lang', array());
+            $default_lang = get_option('g11n_default_lang');
+            unset($all_langs[$default_lang]);
+
+             if (strcmp($post_type, "g11n_translation") !== 0) {
+
+                 //if (strcmp($post_type, "product") !== 0) {
+                    
+                     // creating language translations for each language
+                     $num_success_entries = 0;
+                     $num_langs = 0;
+                     $qualified_taxonomies = get_taxonomies(array("public" => true, "show_ui"=> true), "names", "or");
+                     if (is_array($all_langs)) {
+                         $num_langs = count($all_langs);
+                         foreach( $all_langs as $value => $code) {
+                             $new_translation_id = $this->get_translation_id($post_id,$code,$post_type);
+                             if ( WP_TMY_G11N_DEBUG ) { 
+                                 error_log("In tmy_create_sync_translation, translation_id = " . esc_attr($new_translation_id));
+                             }
+                             if (! isset($new_translation_id)) {
+                                 $num_success_entries += 1;
+                                 //$message .= " $value($code)";
+                                 //error_log("in create_sync_translation, no translation_id");
+             
+                                 if (array_key_exists($post_type, $qualified_taxonomies)) {
+                                 //if (strcmp($post_type, "taxonomy") === 0) {
+                                     $term_name = get_term_field('name', $post_id);
+                                     $g11n_translation_post = array(
+                                           'post_title'    => $term_name,
+                                           'post_content'  => "",
+                                           'post_type'  => "g11n_translation"
+                                     );
+                                 } else {
+                                     $translation_title = get_post_field('post_title', $post_id);
+                                     $translation_contents = get_post_field('post_content', $post_id);
+                                     $translation_excerpt = get_post_field('post_excerpt', $post_id);
+                                     $g11n_translation_post = array(
+                                           'post_title'    => $translation_title,
+                                           'post_content'  => $translation_contents,
+                                           'post_excerpt'  => $translation_excerpt,
+                                           'post_type'  => "g11n_translation"
+                                     );
+                                 }
+                                 $new_translation_id = wp_insert_post( $g11n_translation_post );
+                                 add_post_meta( $new_translation_id, 'orig_post_id', $post_id, true );
+                                 add_post_meta( $new_translation_id, 'g11n_tmy_lang', $code, true );
+                                 add_post_meta( $new_translation_id, 'g11n_tmy_orig_type', $post_type, true );
+                                 //$message .= " " . $new_translation_id . " ";
+                             }
+                             $this->_update_g11n_translation_status($new_translation_id);
+                             if ( WP_TMY_G11N_DEBUG ) { 
+                                 error_log("In tmy_create_sync_translation, new_translation_id = " . esc_attr($new_translation_id));
+                             }
+                         }
+                     }
+                     $message .= $num_success_entries." (no. of languages configured: ". $num_langs.").";
+
+                     // creating language translations for each language
+
+                     // push to translation if all setup
+                     if ((strcmp('', get_option('g11n_server_user','')) !== 0) && 
+                         (strcmp('', get_option('g11n_server_token','')) !== 0) &&
+                         (strcmp('', get_option('g11n_server_url','')) !== 0)) {
+
+                         if (array_key_exists($post_type, $qualified_taxonomies)) {
+                        // if (strcmp($post_type, "taxonomy") === 0) {
+                             $content_title = get_term_field('name', $post_id);
+                             $content_excerpt = "";
+                             $tmp_array = array();
+                             $contents_array = array();
+                             $json_file_name = "WordpressG11nAret-" . $post_type . "-" . $post_id;
+                             array_push($contents_array, $content_title);
+                         } else {
+                             $content_title = get_post_field('post_title', $post_id);
+                             $post_excertpt = get_post_field('post_excerpt', $post_id);
+                             if ($post_excertpt === "") {
+                                 $content_excerpt = get_post_field('post_content', $post_id);
+                             } else {
+                                 $content_excerpt = get_post_field('post_content', $post_id) . "\n" . $post_excertpt;
+                             }
+
+                             //$tmp_array = preg_split('/(\n)/', get_post_field('post_content', $post_id),-1, PREG_SPLIT_DELIM_CAPTURE);
+                             $tmp_array = preg_split('/(\n)/', $content_excerpt, -1, PREG_SPLIT_DELIM_CAPTURE);
+                             $contents_array = array();
+
+                            if (strcmp(get_post_field('post_title', $post_id),'blogname') === 0){
+                                $json_file_name = "WordpressG11nAret-" . "blogname" . "-" . $post_id;
+                            } elseif (strcmp(get_post_field('post_title', $post_id),'blogdescription') === 0){
+                                $json_file_name = "WordpressG11nAret-" . "blogdescription" . "-" . $post_id;
+                            } else {
+                                $json_file_name = "WordpressG11nAret-" . $post_type . "-" . $post_id;
+                                array_push($contents_array, $content_title);
+                            }
+                         }
+
+                         $paragraph = "";
+                         foreach ($tmp_array as $line) {
+                            $paragraph .= $line;
+                            if (strlen($paragraph) > get_option('g11n_server_trunksize',900)) {
+                                array_push($contents_array, $paragraph);
+                                $paragraph = "";
+                            }
+                         }
+                         if (strlen($paragraph)>0) array_push($contents_array, $paragraph);
+                         //error_log("MYSQL" . var_export($contents_array,true));
+                         $push_return_msg = $this->push_contents_to_translation_server($json_file_name, $contents_array);
+                         $message .= " " . $json_file_name . " is pushed to Translation Server: ".$push_return_msg;
+                         if ( WP_TMY_G11N_DEBUG ) {
+                              error_log("In tmy_create_sync_translation,filename:".esc_attr($json_file_name));
+                         }
+                     } else {
+                        $message .= " No translation server setup.";
+                     }
+                     // push to translation if all setup
+                 //}  // post_type check
+             }
+
+             $return_msg = json_encode(array("message" => esc_attr($message),
+                                            // "div_status" => $this->_get_tmy_g11n_metabox($post_id, $post_type)
+                                             "div_status" => " "
+                                            // todo, Jan 2024
+                                      ));
+             //echo esc_attr($message);
+             return $return_msg . "  ";
+
+        }
+
+
 
 	public function get_preferred_language() {
 

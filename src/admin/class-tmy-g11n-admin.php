@@ -148,7 +148,9 @@ class TMY_G11n_Admin {
 
     		register_setting( 'tmy-g11n-settings-group', 'g11n_seo_url_enable' );
     		register_setting( 'tmy-g11n-settings-group', 'g11n_seo_url_label' );
-	
+    		register_setting( 'tmy-g11n-settings-group', 'g11n_translate_slug' );
+    		register_setting( 'tmy-g11n-settings-group', 'g11n_slugs_mappings_config' );
+    		register_setting( 'tmy-g11n-settings-group', 'g11n_enable_html_translator' );
 
                 $all_post_types = tmy_g11n_available_post_types();
                 foreach ( $all_post_types  as $post_type ) {
@@ -1008,6 +1010,22 @@ class TMY_G11n_Admin {
                 </td>
         	</tr>
                 <tr valign="top">
+                <th scope="row"><?php esc_html_e('Enable HTML Translator', 'tmy-globalization') ?></th>
+                <td><select name="g11n_enable_html_translator" id="g11n_enable_html_translator" <?php echo $config_disable; ?> >
+                        <option value='Yes'  <?php selected( esc_attr(get_option('g11n_enable_html_translator','No')), 'Yes' ); ?>>Yes</option>
+                        <option value='No'  <?php selected( esc_attr(get_option('g11n_enable_html_translator','No')), 'No' ); ?>>No</option>
+                </select>
+                </td>
+                </tr>
+                <tr valign="top">
+                <th scope="row"><?php esc_html_e('Translate URL slug', 'tmy-globalization') ?></th>
+                <td><select name="g11n_translate_slug" id="g11n_translate_slug" <?php echo $config_disable; ?> >
+                        <option value='Yes'  <?php selected( esc_attr(get_option('g11n_translate_slug','No')), 'Yes' ); ?>>Yes</option>
+                        <option value='No'  <?php selected( esc_attr(get_option('g11n_translate_slug','No')), 'No' ); ?>>No</option>
+                </select>
+                </td>
+                </tr>
+                <tr valign="top">
                 <th scope="row"><?php esc_html_e('Search Engine Optimization(SEO) URL', 'tmy-globalization') ?></th>
                 <td> 
                     <?php
@@ -1101,9 +1119,33 @@ class TMY_G11n_Admin {
                  } else {
                      echo "<div id=\"tmy_seo_rules_box\" style=\"display: none\"><br>";
                  }
+
+                $current_translate_slug = esc_attr(get_option('g11n_translate_slug','No'));
+                if (strcmp($current_translate_slug, "")===0) {
+                    $current_translate_slug = "No";
+                }
+
+
+                $slugs_mappings = $this->tmy_plugin_g11n_get_slugs_mapping($current_translate_slug);
+                error_log("SLUG MAPPING: ". json_encode($slugs_mappings));
+                $slug_rules_http = "";
+                $slug_rules_https = "";
+                foreach ($slugs_mappings as $slugs_mapping) {
+                    $slug_rules_http .= "RewriteRule (.*?)/". esc_html(urldecode($slugs_mapping["url"])) . "(?:/([^/]*))?$ ".
+                       "http://%{HTTP_HOST}" . esc_attr($home_root) . "$1/" . esc_html($slugs_mapping["url_orig"]) . "/$2?g11n_tmy_lang_code=" .
+                       $slugs_mapping["lang"] . " [QSA,P,NC]<br>";
+                    $slug_rules_https .= "RewriteRule (.*?)/". esc_html(urldecode($slugs_mapping["url"])) . "(?:/([^/]*))?$ ".
+                       "https://%{HTTP_HOST}" . esc_attr($home_root) . "$1/" . esc_html($slugs_mapping["url_orig"]) . "/$2?g11n_tmy_lang_code=" .
+                       $slugs_mapping["lang"] . " [QSA,P,NC],br>";
+                }
+
+
+
               ?> 
                         Depends on your specific configuration, here is the example .htaccess file if you are using Apache, lines between "# BEGIN TMY G11N RULES" and "# END TMY G11N RULES" are newly added. Your .htaccess might look different, in most cases, adding these new lines will work.<br><br>
                         Let's know if you need help, SEO friendly URLs could get tricky sometimes.<br><br>
+
+
 
                         Current .htaccess file: <?php echo esc_attr($htaccess_permission);?> 
 <div style="width: 1000px; padding: 10px; border: 2px solid black; margin: 0;"> 
@@ -1113,8 +1155,10 @@ RewriteCond %{REQUEST_FILENAME} -d  <br>
 RewriteCond %{REQUEST_URI} /+[^\.]+$  <br>
 RewriteRule ^(.+[^/])$ %{REQUEST_URI}/ [R=301,L] <br> 
 RewriteCond %{HTTPS} off <br>
+<?php echo $slug_rules_http; ?>
 RewriteRule ^(<?php echo $rewrite_rules; ?>)/(.*) http://%{HTTP_HOST}<?php echo esc_attr($home_root); ?>$2?g11n_tmy_lang_code=$1 [QSA,P,NC] <br>
 RewriteCond %{HTTPS} on <br>
+<?php echo $slug_rules_https; ?>
 RewriteRule ^(<?php echo $rewrite_rules; ?>)/(.*) https://%{HTTP_HOST}<?php echo esc_attr($home_root); ?>$2?g11n_tmy_lang_code=$1 [QSA,P,NC] <br>
 &lt;/IfModule&gt; <br>
 # END TMY_G11N_RULES <br> </b>
@@ -1127,6 +1171,7 @@ RewriteCond %{REQUEST_FILENAME} !-f <br>
 RewriteCond %{REQUEST_FILENAME} !-d <br>
 RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 &lt;/IfModule&gt; <br>
+
 </div></div>
                 </td>
                 </tr>
@@ -1140,6 +1185,30 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                     function G11nmyOptionSaveChanges() {
                         var div = document.getElementById('tmy_save_changes_status');
                         div.innerHTML = "<div class=\"tmy_loader\"></div>   Saving Changes ....";
+
+                        var slug_div = document.getElementById("g11n_translate_slug");
+                        var slug_value = slug_div.options[slug_div.selectedIndex].value;
+                        var seo_radios = document.getElementsByName("g11n_seo_url_enable");
+                        for (var i = 0, length = seo_radios.length; i < length; i++) {
+                            if (seo_radios[i].checked) {
+                                var seo_value = seo_radios[i].value;
+                                break;
+                            }
+                        }
+
+                        jQuery(document).ready(function($) {
+                                var data = {
+                                    'action': 'tmy_admin_save_changes',
+                                    'g11n_translate_slug': slug_value, 
+                                    'g11n_seo_url_enable': seo_value, 
+                                    'secret': 8763
+                                };
+                                jQuery.post(ajaxurl, data, function(response) {
+                                    div.innerHTML = response.slice(0, -1) ;
+                                });
+                                return;
+                        });
+
                     }
                 </script>
 
@@ -3137,13 +3206,72 @@ error_log("return rows: " . json_encode($q_rows));
 
         }
 
-        function tmy_plugin_g11n_update_htaccess() {
+        function tmy_plugin_g11n_get_slugs_mapping($current_translate_slug) {
 
+            $slugs_mappings = array();
+            $g11n_slugs_mappings_config = array();
+
+            if ($current_translate_slug === "Yes") {
+                global $wpdb;
+                $results = $wpdb->get_results("select ID, post_name from {$wpdb->prefix}posts where post_name <> '' AND post_type='g11n_translation'");
+
+                foreach ($results as $result) {
+                    $original_post_id = get_post_meta($result->ID, 'orig_post_id', True);
+                    $original_post_type = get_post_meta($result->ID, 'g11n_tmy_orig_type', True);
+                    $original_post_status = get_post_field('post_status', $original_post_id);
+                    $translation_language_name = get_post_meta($result->ID, 'g11n_tmy_lang', True);
+                    $translation_language_name = strtolower(str_replace('_', '-', $translation_language_name));
+                    $translation_status = get_post_meta($result->ID, 'g11n_tmy_lang_status', True);
+                    $original_post_name = get_post_field('post_name', $original_post_id);
+    
+                    if ((strcmp($original_post_type, "page")===0)
+                       && (strcmp($original_post_status, "private")!==0)
+                       ) {
+                        $slugs_mappings[] = array("lang" => $translation_language_name,
+                                             "url" => $result->post_name,
+                                             "url_orig" => esc_html($original_post_name)
+                                           );
+                        $g11n_slugs_mappings_config[$translation_language_name]["url"][] = "/" . urldecode($result->post_name) . "/";
+                        $g11n_slugs_mappings_config[$translation_language_name]["url_orig"][] = esc_html("/" . $original_post_name . "/");
+                    }
+                }
+            }
+            error_log("SLUGS_CONFIG: " . json_encode($g11n_slugs_mappings_config));
+            update_option('g11n_slugs_mappings_config', $g11n_slugs_mappings_config);
+            return $slugs_mappings;
+        }
+
+        // from Post saved event
+        function tmy_plugin_g11n_save_post_filter() {
 
             $current_seo_option = esc_attr(get_option('g11n_seo_url_enable','No'));
             if (strcmp($current_seo_option, "")===0) {
                 $current_seo_option = "No";
             }
+
+            $current_translate_slug = esc_attr(get_option('g11n_translate_slug','No'));
+            if (strcmp($current_translate_slug, "")===0) {
+                $current_translate_slug = "No";
+            }
+            $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+
+        }
+
+        // from "Save Changes" button pressed
+        function tmy_admin_save_changes() {
+
+            error_log("save changes: ". json_encode($_POST));
+
+            $current_translate_slug = esc_attr($_POST["g11n_translate_slug"]);
+            $current_seo_option = esc_attr($_POST["g11n_seo_url_enable"]);
+            error_log("save changes: $current_translate_slug $current_seo_option");
+
+            $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+
+        }
+
+        function tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug) {
+
 
             if ($current_seo_option === "Yes") {
                 $home_root = parse_url( home_url() );
@@ -3159,19 +3287,34 @@ error_log("return rows: " . json_encode($q_rows));
 		} else {
                     $rewrite_rules = " ";
 		}
-    
+
+                $slugs_mappings = $this->tmy_plugin_g11n_get_slugs_mapping($current_translate_slug);
+
+                //error_log("SLUG MAPPING: ". json_encode($slugs_mappings));
+                $slug_rules_http = array();
+                $slug_rules_https = array();
+                foreach ($slugs_mappings as $slugs_mapping) {
+                    $slug_rules_http[] = "RewriteRule (.*?)/". esc_html(urldecode($slugs_mapping["url"])) . "(?:/([^/]*))?$ ".
+                       "http://%{HTTP_HOST}" . esc_attr($home_root) . "$1/" . esc_html($slugs_mapping["url_orig"]) . "/$2?g11n_tmy_lang_code=" .
+                       $slugs_mapping["lang"] . " [QSA,P,NC]";
+                    $slug_rules_https[] = "RewriteRule (.*?)/". esc_html(urldecode($slugs_mapping["url"])) . "(?:/([^/]*))?$ ".
+                       "https://%{HTTP_HOST}" . esc_attr($home_root) . "$1/" . esc_html($slugs_mapping["url_orig"]) . "/$2?g11n_tmy_lang_code=" .
+                       $slugs_mapping["lang"] . " [QSA,P,NC]";
+                }
                 $content = array(
                     '<IfModule mod_rewrite.c>',
                     'RewriteEngine On',
                     'RewriteCond %{REQUEST_FILENAME} -d',
                     'RewriteCond %{REQUEST_URI} /+[^\.]+$',
                     'RewriteRule ^(.+[^/])$ %{REQUEST_URI}/ [R=301,L]',
-                    'RewriteCond %{HTTPS} off',
-                    'RewriteRule ^(' . $rewrite_rules . ')/(.*) http://%{HTTP_HOST}' . esc_attr($home_root) .'$2?g11n_tmy_lang_code=$1 [QSA,P,NC]',
-                    'RewriteCond %{HTTPS} on',
-                    'RewriteRule ^(' . $rewrite_rules . ')/(.*) https://%{HTTP_HOST}' . esc_attr($home_root) .'$2?g11n_tmy_lang_code=$1 [QSA,P,NC]',
-                    '</IfModule>'
+                    'RewriteCond %{HTTPS} off'
                 );
+                $content = array_merge($content, $slug_rules_http);
+                $content[] = 'RewriteRule ^(' . $rewrite_rules . ')/(.*) http://%{HTTP_HOST}' . esc_attr($home_root) .'$2?g11n_tmy_lang_code=$1 [QSA,P,NC]';
+                $content[] = 'RewriteCond %{HTTPS} on';
+                $content = array_merge($content, $slug_rules_https);
+                $content[] = 'RewriteRule ^(' . $rewrite_rules . ')/(.*) https://%{HTTP_HOST}' . esc_attr($home_root) .'$2?g11n_tmy_lang_code=$1 [QSA,P,NC]';
+                $content[] = '</IfModule>';
             } else {
                 $content = array();
             }

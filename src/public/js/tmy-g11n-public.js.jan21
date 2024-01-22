@@ -31,31 +31,6 @@
 
     jQuery(document).ready(function($){
 
-        function findAndUpdateTextNodes(node, origText, newText) {
-            if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '' &&
-                  !$(node).closest('#wpadminbar').length &&
-                  !$(node).closest('input, textarea').length &&
-                  !$(node).closest('script').length &&
-                  !$(node).closest('.popup-container').length &&
-                  !$(node).closest('.translatio-logo-popup').length) {
-                var textContent = node.nodeValue.trim();
-                textContent = textContent.replace(/^\n+|\n+$/g, '');
-
-                if (textContent === origText) {
-                    textContent = newText;
-                }
-                const span = document.createElement('span');
-                span.className = 'tmyhighlighted';
-                const highlightedText = document.createTextNode(textContent);
-                span.appendChild(highlightedText);
-                node.parentNode.replaceChild(span, node);
-            } else {
-                for (const childNode of node.childNodes) {
-                  findAndUpdateTextNodes(childNode, origText, newText);
-                }
-            }
-        }
-
         function findAndPrintTextNodes(node, sentencelist) {
             var contentLanguage = $('meta[http-equiv="content-language"]').attr('content');
             //if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
@@ -63,13 +38,10 @@
                   !$(node).closest('#wpadminbar').length && 
                   !$(node).closest('input, textarea').length &&
                   !$(node).closest('script').length &&
-                  !$(node).closest('.popup-container').length &&
                   !$(node).closest('.translatio-logo-popup').length) {
 
                 //console.log(node.nodeValue);
-                var textContent = node.nodeValue.trim();
-                textContent = textContent.replace(/^\n+|\n+$/g, '');
-
+                var textContent = node.nodeValue;
                 sentencelist.push(textContent);
                 if (textContent in translationTable) {
                     //console.log("         ");
@@ -109,8 +81,6 @@
 
             const textNodePosition = $(this).offset();
             var textValue = $(this).text();
-            var textValue = textValue.trim();
-            textValue = textValue.replace(/^\n+|\n+$/g, '');
 
             // Create a hin box with "Click to edit" message
             const hint = $('<div class="hint"><button id="clickableButton">Start or Sync Translation</button></div>');
@@ -178,25 +148,26 @@
 
             $('.table-status').html('<div class="tmy_loader"></div>');
 
+            var numberOfInputFields = $('.TmyInputClass').length;
+            console.log("Save..." + numberOfInputFields);
             var contentLanguage = $('meta[http-equiv="content-language"]').attr('content');
-            var referenceId = $('meta[http-equiv="translatio-tmy-ref-id"]').attr('content');
-            var origText = Object.keys(translationTable).find(key => translationTable[key] === textValue);
-            translationTable[origText] = $('.TmyInputClass').val();
 
-            findAndUpdateTextNodes(document.body, textValue, translationTable[origText]);
+            var jsonObject = {};
 
-            console.log('Value of Orig: ', origText);
-            console.log('Save Translation: ', textValue);
-            console.log('Value of Input Field :', translationTable[origText]);
+            $('.TmyInputClass').each(function(index, element) {
+                var inputValue = $(element).val();
+                var inputID = $(element).attr('id');
+                jsonObject[inputID] = inputValue;
 
+                console.log('Value of Input Field ' + inputID + ':', inputValue);
+            });
             //console.log('json obj: ' + JSON.stringify(jsonObject));
 
             var data = {
                 'action': 'tmy_g11n_frontend_jquery_call',
                 'operation': 'tmy_ops_save_translation',
                 'language': contentLanguage,
-                'referenceid': referenceId,
-                'obj': translationTable
+                'obj': jsonObject
             };
             $.ajax({
                 type:    "POST",
@@ -241,8 +212,8 @@
                    returnMessage = returnArr["return_message"];
         
                    console.log(returnMessage);
-                   console.log("translationTable");
-                   console.log(translationTable);
+                   //console.log("translationTable");
+                   //console.log(translationTable);
        
                 },
                 error:   function(jqXHR, textStatus, errorThrown ) {
@@ -260,8 +231,7 @@
             //console.log(translationTable);
 
             var contentLanguage = $('meta[http-equiv="content-language"]').attr('content');
-            var referenceId = $('meta[http-equiv="translatio-tmy-ref-id"]').attr('content');
-            console.log("Start translation on: " + textValue + " " + referenceId);
+            console.log("Start translation on: " + textValue);
         
             const popupBox = $(
                 '<div class="popup-container">' +
@@ -293,27 +263,51 @@
                 top: topPosition
             });
 
-            var table = $('<table id="tmy-translation-table">');
+            var returnArr;
+            var returnSingleTranArr;
+            var returnMessage;
+            var data = {
+                    'action': 'tmy_g11n_frontend_jquery_call',
+                    'operation': 'tmy_ops_get_translation',
+                    'language': contentLanguage,
+                    'text': textValue
+            };
+            $.ajax({
+                    type:    "POST",
+                    //async:   false,
+                    url:     tmy_g11n_ajax_obj.ajax_url,
+                    data:    data,
+                    success: function(response) {
+                        returnArr = JSON.parse(response);
+                        returnSingleTranArr = returnArr["return_data"];
+                        //translationTable = returnArr["return_data"];
+                        returnMessage = returnArr["return_message"];
+                        console.log(response);
+                        console.log(returnMessage);
 
-            var origText = Object.keys(translationTable).find(key => translationTable[key] === textValue);
+                        var table = $('<table id="tmy-translation-table">');
+                        $.each(returnSingleTranArr, function(index, returnRow) {
+                            var row = $('<tr>');
+                            var languageCell = $('<td>').text(returnRow.language);
+                            row.append(languageCell);
+                            var inputField = $('<input type="text" value="' +
+                                       returnRow.text
+                                       + '">');
+                            inputField.attr('id', returnRow.code);
+                            inputField.attr('size', 50);
+                            inputField.addClass('TmyInputClass');
 
-            var row = $('<tr>');
-            var languageCell = $('<td>').text(origText);
-            //languageCell.addClass('bordered-cell');
-            row.append(languageCell);
-            table.append(row);
-
-            var row = $('<tr>');
-            var inputField = $('<input type="text" value="' + textValue + '">');
-            inputField.attr('size', 50);
-            inputField.addClass('TmyInputClass');
-            var inputCell = $('<td>').append(inputField);
-            row.append(inputCell);
-            table.append(row);
-
-            $('#tmy-translation-table').replaceWith(table);
-            //$('.table-status').text(returnMessage);
-            $('.table-status').text("Ref" + referenceId);
+                            var inputCell = $('<td>').append(inputField);
+                            row.append(inputCell);
+                            table.append(row);
+                        });
+                        $('#tmy-translation-table').replaceWith(table);
+                        $('.table-status').text(returnMessage);
+                    },
+                        error:   function(jqXHR, textStatus, errorThrown ) {
+                            returnMessage = "Error, status = " + jqXHR.status + ", " + "textStatus: " + textStatus + "ErrorThrown: " + errorThrown;
+                    }
+            });
 
             $(document).on('click', function(e) {
                 // Check if the clicked element is not inside the popup
@@ -381,7 +375,6 @@
                 var languageCell = $('<td>').text(i);
                 row.append(languageCell);
                 var inputField = $('<input type="text" value="' + sentencelist[i] + '">');
-                //var inputField = $('<textarea>' + sentencelist[i] + '</textarea>');
                 inputField.attr('id', i);
                 inputField.attr('size', 50);
                 inputField.addClass('TmyInputClass');
@@ -414,8 +407,8 @@
         logo_popup.fadeIn();
 
         handleBuildTranslationTable();
-        console.log("translation table in json");
-        console.log(JSON.stringify(translationTable));
+        //console.log("translation table in json");
+        //console.log(JSON.stringify(translationTable));
 
         // Find and print text nodes in the entire HTML
         findAndPrintTextNodes(document.body, sentencelist);
