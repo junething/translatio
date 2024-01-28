@@ -172,6 +172,7 @@ class TMY_G11n {
 		$this->loader->add_action( 'wp_ajax_tmy_create_sync_translation', $plugin_admin, 'tmy_create_sync_translation' );
 		$this->loader->add_action( 'wp_ajax_tmy_get_post_translation_status', $plugin_admin, 'tmy_get_post_translation_status' );
 		$this->loader->add_action( 'wp_ajax_tmy_admin_save_changes', $plugin_admin, 'tmy_admin_save_changes' );
+		$this->loader->add_action( 'wp_ajax_tmy_g11n_admin_slugs_ops', $plugin_admin, 'tmy_g11n_admin_slugs_ops' );
 
 		$this->loader->add_filter( 'views_edit-post', $plugin_admin, 'g11n_edit_posts_views' );
                 $this->loader->add_filter( 'pre_update_option', $plugin_admin,'tmy_plugin_option_update', 10, 3 );
@@ -257,8 +258,8 @@ class TMY_G11n {
 
 		$plugin_public = new TMY_G11n_Public( $this->get_plugin_name(), $this->get_version(), $this->get_translator() );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 1 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 1 );
 
 		$this->loader->add_action( 'init', $plugin_public, 'G11nStartSession', 1 );
 		//$this->loader->add_action( 'init', $plugin_public, 'g11n_setcookie' );
@@ -336,6 +337,8 @@ class TMY_G11n {
 		$this->loader->add_action( 'init', $plugin_public, 'tmy_g11n_blocks_init');
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'tmy_g11n_template_redirect');
 		//$this->loader->add_filter( 'site_url', $plugin_public, 'tmy_g11n_site_url', 10, 2);
+
+                $this->loader->add_filter( 'fusion_faq_all_filter_name', $plugin_public, 'tmy_translation_get_text_filter', 10, 1 );
 
                 //$this->loader->add_filter( 'get_category', $plugin_public, 'tmy_translation_get_taxonomy_filter', 10, 2 );
                 //$this->loader->add_filter( 'get_post_tag', $plugin_public, 'tmy_translation_get_taxonomy_filter', 10, 2 );

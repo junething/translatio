@@ -720,11 +720,11 @@ class TMY_G11n_Translator {
 
                 // error_log(" In get_preferred_language session status :". session_status() . " is_admin:" . is_admin());
                 if (session_status() !== PHP_SESSION_ACTIVE) { 
-                    session_start();
+                    @session_start();
                 }
 
                 if (! isset($_SESSION)) {
-                    session_start();
+                    @session_start();
                 }
                 $seq_code = mt_rand(1000,9999);
 
@@ -749,7 +749,7 @@ class TMY_G11n_Translator {
                 }
                 if (!isset($_SESSION['g11n_language'])) {
                     $_SESSION['g11n_language'] = get_option('g11n_default_lang');
-                    setcookie('g11n_language', $_SESSION['g11n_language'], strtotime('+1 day'));
+                    @setcookie('g11n_language', $_SESSION['g11n_language'], strtotime('+1 day'));
                     if ( WP_TMY_G11N_DEBUG ) {
                         error_log(esc_attr($seq_code) . " Starting session, id=" . esc_attr(session_id()) . ",lang is not set, set as: " . esc_attr(get_option('g11n_default_lang')));
                     }

@@ -75,7 +75,11 @@ class TMY_G11n_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tmy-g11n-admin.css', array(), $this->version, 'all' );
+                if($_GET["page"] === "tmy-g11n-slugs-menu"){
+		    wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tmy-g11n-admin-slugs-page.css', array(), $this->version, 'all' );
+                } else {
+		    wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tmy-g11n-admin.css', array(), $this->version, 'all' );
+                }
 
 	}
 
@@ -98,7 +102,11 @@ class TMY_G11n_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-admin.js', array( 'jquery' ), $this->version, false );
+                if($_GET["page"] === "tmy-g11n-slugs-menu"){
+		    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-admin-slugs-page.js', array( 'jquery' ), $this->version, false );
+                } else {
+		    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-admin.js', array( 'jquery' ), $this->version, false );
+                }
 
 	}
 
@@ -149,8 +157,10 @@ class TMY_G11n_Admin {
     		register_setting( 'tmy-g11n-settings-group', 'g11n_seo_url_enable' );
     		register_setting( 'tmy-g11n-settings-group', 'g11n_seo_url_label' );
     		register_setting( 'tmy-g11n-settings-group', 'g11n_translate_slug' );
-    		register_setting( 'tmy-g11n-settings-group', 'g11n_slugs_mappings_config' );
     		register_setting( 'tmy-g11n-settings-group', 'g11n_enable_html_translator' );
+
+    		add_option('g11n_slugs_mappings_config', array());
+    		add_option('g11n_slugs_mappings_config_extra', array());
 
                 $all_post_types = tmy_g11n_available_post_types();
                 foreach ( $all_post_types  as $post_type ) {
@@ -180,6 +190,15 @@ class TMY_G11n_Admin {
                           	  'tmy-g11n-setup-menu', 
                           	  array( $this,
                                          'tmy_admin_options_page'),
+                                  1 );
+
+		add_submenu_page( 'tmy-g11n-main-menu',
+                                  __( 'Slugs', 'tmy-globalization'),
+                          	  __( 'Slugs', 'tmy-globalization'),
+                            	  'manage_options', 
+                          	  'tmy-g11n-slugs-menu', 
+                          	  array( $this,
+                                         'tmy_admin_slugs_page'),
                                   1 );
 
         	add_submenu_page( 'tmy-g11n-main-menu',
@@ -688,6 +707,8 @@ class TMY_G11n_Admin {
                         document.getElementById("g11n_resource_file_location").disabled=false;
                         document.getElementById("g11n_seo_url_enable_no").disabled=false;
                         document.getElementById("g11n_seo_url_enable_yes").disabled=false;
+                        document.getElementById("g11n_enable_html_translator").disabled=false;
+                        document.getElementById("g11n_translate_slug").disabled=false;
                         document.getElementById("submit").disabled=false;
                         var all_additional_langs=document.querySelectorAll('[id^="g11n_additional_lang_id_"]');
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
@@ -733,6 +754,8 @@ class TMY_G11n_Admin {
                         document.getElementById("g11n_resource_file_location").disabled=true;
                         document.getElementById("g11n_seo_url_enable_no").disabled=true;
                         document.getElementById("g11n_seo_url_enable_yes").disabled=true;
+                        document.getElementById("g11n_enable_html_translator").disabled=true;
+                        document.getElementById("g11n_translate_slug").disabled=true;
                         var all_additional_langs=document.querySelectorAll('[id^="g11n_additional_lang_id_"]');
                         for (var i=0 ; i < all_additional_langs.length ; i++) {
                                 all_additional_langs[i].disabled=true;
@@ -1245,6 +1268,43 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 
 
         }
+
+        public function tmy_admin_slugs_page() {
+	    if ( !current_user_can( 'manage_options' ) )  {
+		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+ 	    }
+            ?>
+            <div class="wrap"><h1> <img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translaio Slugs Manager', 'tmy-globalization') ?></h1>
+               <br>
+               Rules that are not editable are automatically generated based on translation pages, to change, visit each tranlsation, edit the slug field.
+               <br>
+               <br>
+
+               <table id="editableTable">
+                   <thead>
+                       <tr>
+                           <th id="langField">Language</th>
+                           <th id="urlField">URL</th>
+                           <th id="slugField">Slug</th>
+                           <th class="actionColumn"></th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       <!-- Rows will be dynamically added here -->
+                   </tbody>
+               </table>
+               <br>
+
+               <div id="detectedValuesContent">
+                   <!-- Content will be dynamically generated here -->
+               </div>
+
+               <button id="saveTable" class="button button-primary saveBtn">Save</button>
+               <button id="addRow" class="button button-primary">Add Row</button>
+
+            <?php
+        }
+
         public function tmy_l10n_taxonomy_page() {
 	    if ( !current_user_can( 'manage_options' ) )  {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
@@ -2714,7 +2774,7 @@ error_log("return rows: " . json_encode($q_rows));
 
             $ret_msg = "";
             if ( WP_TMY_G11N_DEBUG ) {
-                error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) );
+                error_log("tmy_plugin_option_update:" . esc_attr(json_encode($option)) . " " . $old_value . "->" . $value );
             } 
 
             if ((strcmp($option, "g11n_agree_to_leave_email")===0) && (strcmp($value, "on")===0)) {
@@ -3014,27 +3074,86 @@ error_log("return rows: " . json_encode($q_rows));
 
         function tmy_plugin_g11n_register_bulk_actions( $bulk_actions ) {
             $bulk_actions['start_sync_tranlations'] = __( 'Start or Sync Translation', 'tmy-globalization');
+            $bulk_actions['start_html_tranlations'] = __( 'Start HTML Translation', 'tmy-globalization');
             return $bulk_actions;
         }
 
         function tmy_plugin_g11n_bulk_action_handler( $redirect_to, $doaction, $post_ids ) {
-            if ( $doaction !== 'start_sync_tranlations' ) {
-                return $redirect_to;
-            }
-            $result = '<br>';
-            foreach ( $post_ids as $post_id ) {
-               $post_type = get_post_type($post_id);
-	       $post_result = $this->_tmy_create_sync_translation($post_id, $post_type);
-	       $post_result_var = json_decode($post_result);
-               $result .= $post_result_var->message ."<br>";
 
-               $dep_message = $this->_tmy_create_sync_dep_translation($post_id);
-               $result .= " " . $dep_message;
-               //error_log($post_result);
+            if ( $doaction === 'start_sync_tranlations' ) {
+                $result = '<br>';
+                foreach ( $post_ids as $post_id ) {
+                   $post_type = get_post_type($post_id);
+	           $post_result = $this->_tmy_create_sync_translation($post_id, $post_type);
+	           $post_result_var = json_decode($post_result);
+                   $result .= $post_result_var->message ."<br>";
+    
+                   $dep_message = $this->_tmy_create_sync_dep_translation($post_id);
+                   $result .= " " . $dep_message;
+                   //error_log($post_result);
+                }
+                $result .= "<br>";
+                //$redirect_to = add_query_arg( 'start_sync_tranlations', count( $post_ids ), $redirect_to );
+                $redirect_to = add_query_arg( 'start_sync_tranlations', $result, $redirect_to );
+            } elseif ( $doaction === 'start_html_tranlations' ) {
+                $result = 'Started HTML translation for following post/pages:';
+                foreach ( $post_ids as $post_id ) {
+                    $page_url = home_url() . "/?p=" . $post_id ;
+                   
+                    $response = wp_remote_get($page_url);
+                    if (is_array($response) && !is_wp_error($response)) {
+                        $page_html = wp_remote_retrieve_body($response);
+                        $dom = new DOMDocument();
+                        @$dom->loadHTML($page_html);
+                        $textArray = [];
+                        $xpath = new DOMXPath($dom);
+                        $nodes = $xpath->query('//*[not(self::script or self::style)]/text()');
+                        foreach ($nodes as $node) {
+                           $nodeValue = trim($node->nodeValue);
+                           if (!empty($nodeValue)) {
+                              $textArray[] = $nodeValue;
+                           }
+                        }
+                        $pattern = '/<meta\s+name="description"\s+content="([^"]+)"\s*\/?>/i';
+                        if (preg_match($pattern, $page_html, $matches)) {
+                            $textArray[] = trim($matches[1]);
+                        }
+
+                        global $wpdb;
+                        $page_place_holder_title = $post_id . "-page-translation";
+                        $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($page_place_holder_title) . "\" and post_status=\"private\"";
+                        $result = $wpdb->get_results($sql);
+
+                        $page_table = "";
+                        foreach ($textArray as $text) {
+                            $page_table .= "<!--" . $text . "-->" . $text . "<!--end--><br>\n";
+                        }
+                        if (! isset($result[0]->ID)) {
+                            $holder_id = wp_insert_post(
+                                  array(
+                                       'post_title'    => esc_attr($page_place_holder_title),
+                                       'post_content'  => $page_table,
+                                       'post_status' => 'private',
+                                       'post_type'  => "post"
+                                 ));
+                        } else {
+                            $holder_id = $result[0]->ID;
+                            $holder_id = wp_insert_post(
+                                  array(
+                                       'ID' => $holder_id,
+                                       'post_title'    => esc_attr($page_place_holder_title),
+                                       'post_content'  => $page_table,
+                                       'post_status' => 'private',
+                                       'post_type'  => "post"
+                                 ));
+                        }
+                        $this->translator->_tmy_create_sync_translation($holder_id, "post");
+                        $result .= "<br>" . get_post_field('post_title', $post_id) . "($post_id)" . " phrases count: " . count($textArray);
+                        $result .= " translation post id: " . $holder_id;
+                    } 
+                }
+                $redirect_to = add_query_arg( 'start_html_tranlations', $result, $redirect_to );
             }
-            $result .= "<br>";
-            //$redirect_to = add_query_arg( 'start_sync_tranlations', count( $post_ids ), $redirect_to );
-            $redirect_to = add_query_arg( 'start_sync_tranlations', $result, $redirect_to );
             return $redirect_to;
         }
 
@@ -3062,6 +3181,15 @@ error_log("return rows: " . json_encode($q_rows));
 	        ?>
 			    <div class="updated notice is-dismissible">
 				    <?php echo $_REQUEST['start_sync_tranlations'] ?>
+			    </div>
+	        <?php
+	        //$redirect_to = remove_query_arg( 'start_sync_tranlations' );
+		//return $redirect_to;
+	    }
+	    if( ! empty( $_REQUEST[ 'start_sync_tranlations' ] ) ) {
+	        ?>
+			    <div class="updated notice is-dismissible">
+				    <?php echo $_REQUEST['start_html_tranlations'] ?>
 			    </div>
 	        <?php
 	        //$redirect_to = remove_query_arg( 'start_sync_tranlations' );
@@ -3231,12 +3359,29 @@ error_log("return rows: " . json_encode($q_rows));
                                              "url" => $result->post_name,
                                              "url_orig" => esc_html($original_post_name)
                                            );
-                        $g11n_slugs_mappings_config[$translation_language_name]["url"][] = "/" . urldecode($result->post_name) . "/";
-                        $g11n_slugs_mappings_config[$translation_language_name]["url_orig"][] = esc_html("/" . $original_post_name . "/");
+                        $g11n_slugs_mappings_config[$translation_language_name]["url"][] =  urldecode($result->post_name);
+                        $g11n_slugs_mappings_config[$translation_language_name]["url_orig"][] = esc_html($original_post_name );
                     }
                 }
+
+                //loading g11n_slugs_mappings_config_extra
+                $conf_rules = get_option('g11n_slugs_mappings_config_extra', array());
+                if (is_array($conf_rules) && !empty($conf_rules)) {
+                    foreach ($conf_rules as $lang_code => $mapping) {
+                        if (is_array($mapping["url"]) && !empty($mapping["url"])) {
+                            foreach ($mapping["url"] as $i => $url) {
+                               $slugs_mappings[] = array('lang' => $lang_code,
+                                             'url' => $url,
+                                             'url_orig' => $mapping["url_orig"][$i]
+                                           );
+                            }
+                        }
+                    }
+                }
+
             }
-            error_log("SLUGS_CONFIG: " . json_encode($g11n_slugs_mappings_config));
+            //a:2:{s:5:"zh-cn";a:2:{s:3:"url";a:1:{i:0;s:8:"/关于/";}s:8:"url_orig";a:1:{i:0;s:7:"/about/";}}
+            //     s:5:"pt-br";a:2:{s:3:"url";a:1:{i:0;s:7:"/sobre/";}s:8:"url_orig";a:1:{i:0;s:7:"/about/";}}}
             update_option('g11n_slugs_mappings_config', $g11n_slugs_mappings_config);
             return $slugs_mappings;
         }
@@ -3260,13 +3405,14 @@ error_log("return rows: " . json_encode($q_rows));
         // from "Save Changes" button pressed
         function tmy_admin_save_changes() {
 
-            error_log("save changes: ". json_encode($_POST));
+            error_log("save admin changes: ". json_encode($_POST));
 
             $current_translate_slug = esc_attr($_POST["g11n_translate_slug"]);
             $current_seo_option = esc_attr($_POST["g11n_seo_url_enable"]);
             error_log("save changes: $current_translate_slug $current_seo_option");
 
             $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+            error_log("save admin changes done: ". json_encode(get_option('g11n_slugs_mappings_config_extra', array())));
 
         }
 
@@ -3290,7 +3436,6 @@ error_log("return rows: " . json_encode($q_rows));
 
                 $slugs_mappings = $this->tmy_plugin_g11n_get_slugs_mapping($current_translate_slug);
 
-                //error_log("SLUG MAPPING: ". json_encode($slugs_mappings));
                 $slug_rules_http = array();
                 $slug_rules_https = array();
                 foreach ($slugs_mappings as $slugs_mapping) {
@@ -3320,6 +3465,108 @@ error_log("return rows: " . json_encode($q_rows));
             }
             $htaccess_location = get_home_path() . '.htaccess';
             $ret = insert_with_markers_default_front( $htaccess_location, 'TMY_G11N_RULES', $content );
+
+        }
+
+	public function tmy_g11n_admin_slugs_ops() {
+
+            if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
+                $nonce  = filter_input( INPUT_POST, '_wpnonce', FILTER_SANITIZE_STRING );
+                if ( ! wp_verify_nonce( $nonce, $action ) )
+                    wp_die( 'Nope! Security check failed!' );
+            }
+
+            $main_rules = array();
+            $main_rules_extra = array();
+            $return_code = 0;
+            $return_message = "";
+
+            if ( isset( $_POST['operation'] )) {
+
+                global $wpdb;
+                switch ( esc_attr($_POST['operation']) ) {
+                    case 'tmy_g11n_admin_slugs_ops_getrules':
+                        //Array ( [zh-cn] => Array ( [url] => Array ( [0] => /关于/)
+                        //                           [url_orig] => Array ( [0] => /about/))
+                        $conf_rules = get_option('g11n_slugs_mappings_config', array());
+                        if (is_array($conf_rules) && !empty($conf_rules)) {
+                            foreach ($conf_rules as $lang_code => $mapping) {
+                                if (is_array($mapping["url"]) && !empty($mapping["url"])) {
+                                    foreach ($mapping["url"] as $i => $url) {
+                                       $main_rules[] = array('lang' => $lang_code,
+                                                     'slug' => $url,
+                                                     'url' => $mapping["url_orig"][$i]
+                                                   );
+                                    }
+                                }
+                            }
+                        }
+
+                        $conf_rules = get_option('g11n_slugs_mappings_config_extra', array());
+                        if (is_array($conf_rules) && !empty($conf_rules)) {
+                            foreach ($conf_rules as $lang_code => $mapping) {
+                                if (is_array($mapping["url"]) && !empty($mapping["url"])) {
+                                    foreach ($mapping["url"] as $i => $url) {
+                                       $main_rules_extra[] = array('lang' => $lang_code,
+                                                     'slug' => $url,
+                                                     'url' => $mapping["url_orig"][$i]
+                                                   );
+                                    }
+                                }
+                            }
+                        }
+
+                        $return_message .= "get slugs rules";
+                        break;
+
+                    case 'tmy_g11n_admin_slugs_ops_saverules':
+                        $rules_tmp = esc_sql($_POST['data']);
+                        error_log("SAVING RULES: " . json_encode($rules_tmp));
+                        $slugs_config = array();
+
+                        //[["zh-cn","\/about\/","\/\u5173\u4e8e\/"],["pt-br","\/about\/","\/sobre\/"]]
+                        //Array ( [zh-cn] => Array ( [url] => Array ( [0] => /关于/)
+                        //                           [url_orig] => Array ( [0] => /about/))
+
+                        if (is_array($rules_tmp) && !empty($rules_tmp)) {
+                            foreach ($rules_tmp as $rule) {
+                                error_log("each rule: " . json_encode($rule));
+                                if (empty($rule[0]) || empty($rule[1]) || empty($rule[2])) {
+                                    continue;
+                                } else {
+                                    $slugs_config[$rule[0]]["url"][] = esc_attr($rule[2]);
+                                    $slugs_config[$rule[0]]["url_orig"][] = esc_attr($rule[1]);
+                                }
+                            }
+                        }
+                        error_log("Saving slugs extra config: " . json_encode($slugs_config));
+                        $update_ret = update_option('g11n_slugs_mappings_config_extra', $slugs_config);
+
+                        $current_seo_option = esc_attr(get_option('g11n_seo_url_enable','No'));
+                        if (strcmp($current_seo_option, "")===0) {
+                            $current_seo_option = "No";
+                        }
+                        $current_translate_slug = esc_attr(get_option('g11n_translate_slug','No'));
+                        if (strcmp($current_translate_slug, "")===0) {
+                            $current_translate_slug = "No";
+                        }
+                        $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+
+                        if ($update_ret) {
+                            $return_message .= "Rules Saved!";
+                        } else {
+                            $return_message .= "Rules Not Saved!";
+                        }
+                        break;
+                }
+            }
+            echo json_encode(array("main_rules" => $main_rules,
+                                   "main_rules_extra" => $main_rules_extra,
+                                   "return_code" => $return_code,
+                                   "return_message" => $return_message
+                                  )
+                            );
+            wp_die();
 
         }
 

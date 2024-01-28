@@ -31,22 +31,31 @@
 
     jQuery(document).ready(function($){
 
-        function findAndPrintTextNodes(node) {
+        function findAndPrintTextNodes(node, sentencelist) {
             var contentLanguage = $('meta[http-equiv="content-language"]').attr('content');
-            if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
-                //console.log(node.nodeValue);
-                var textContent = node.nodeValue;
+            //if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
+              if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '' && 
+                  !$(node).closest('#wpadminbar').length && 
+                  !$(node).closest('input, textarea').length &&
+                  !$(node).closest('script').length &&
+                  !$(node).closest('.translatio-logo-popup').length) {
 
+                //console.log(node.nodeValue);
+                var textContent = node.nodeValue.trim();
+                textContent = textContent.replace(/^\n+|\n+$/g, '');
+
+                sentencelist.push(textContent);
                 if (textContent in translationTable) {
                     //console.log("         ");
                     //console.log("[" + textContent +"]");
                     //console.log("Translation Table: " + JSON.stringify(translationTable[textContent]));
 
-                    if (contentLanguage in translationTable[textContent]){
+                    //if (contentLanguage in translationTable[textContent]){
                         //console.log("Translation Table: " + translationTable[textContent][contentLanguage]);
                         //console.log("Translation Table: " + JSON.stringify(translationTable[textContent][contentLanguage]));
-                        textContent = translationTable[textContent][contentLanguage];
-                    }
+                        //textContent = translationTable[textContent][contentLanguage];
+                        textContent = translationTable[textContent];
+                    //}
                 }
                 // Highlight the text node with a border
                 const span = document.createElement('span');
@@ -62,18 +71,23 @@
 
             } else {
                 for (const childNode of node.childNodes) {
-                  findAndPrintTextNodes(childNode);
+                  findAndPrintTextNodes(childNode, sentencelist);
                 }
             }
         }
+
 
         function handleBuildTranslationTable() {
 
             var returnArr;
             var returnMessage;
+            var contentLanguage = $('meta[http-equiv="content-language"]').attr('content');
+            var referenceId = $('meta[http-equiv="translatio-tmy-ref-id"]').attr('content');
             var data = {
                 'action': 'tmy_g11n_frontend_jquery_call',
-                'operation': 'tmy_ops_get_translation_table'
+                'operation': 'tmy_ops_get_translation_table',
+                'language': contentLanguage,
+                'referenceid': referenceId
             };
             $.ajax({
                 type:    "POST",
@@ -86,8 +100,8 @@
                    returnMessage = returnArr["return_message"];
         
                    console.log(returnMessage);
-                   //console.log("translationTable");
-                   //console.log(translationTable);
+                   console.log("translationTable");
+                   console.log(translationTable);
        
                 },
                 error:   function(jqXHR, textStatus, errorThrown ) {
@@ -96,14 +110,12 @@
             });
         }
 
-        console.log("Starting TMY");
-        var translationTable;
-        handleBuildTranslationTable();
-        //console.log("translation table in json");
-        //console.log(JSON.stringify(translationTable));
+        console.log("Starting TMY no priv");
 
-        // Find and print text nodes in the entire HTML
-        findAndPrintTextNodes(document.body);
+        var translationTable;
+        var sentencelist = [];
+        handleBuildTranslationTable();
+        findAndPrintTextNodes(document.body, sentencelist);
 
     }); //jquery ready
 

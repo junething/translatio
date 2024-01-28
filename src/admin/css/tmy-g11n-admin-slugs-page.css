@@ -1,0 +1,105 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+<script>
+.loader {
+  border: 3px solid #f3f3f3;
+  border-radius: 80%;
+  border-top: 3px solid blue;
+  border-bottom: 3px solid blue;
+  width: 15px;
+  height: 15px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+        #editableTable {
+            border-collapse: collapse;
+            width: 50%;
+            table-layout: fixed; /* Prevent columns from expanding */
+        }
+
+        #editableTable th, #editableTable td {
+            padding: 8px;
+            text-align: left;
+            //background-color: #f9f9f9; /* Same background color for all fields */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #editableTable th {
+            border-bottom: 1px solid #ddd;
+            border-top: 1px solid #ddd;
+        }
+
+        #editableTable td {
+            border-bottom: 1px solid #ddd;
+            height: 5px; /* Adjusted row height */
+        }
+
+        .saveBtn {
+            background-color: #007cba;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            width: auto; /* Adjusted button width to match content */
+        }
+
+        #editableTable .actionColumn {
+            width: 1%; /* Set to a small width */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        #addRow, #saveTable {
+            //margin-top: 5px;
+            //padding: 8px;
+            cursor: pointer;
+        }
+
+        #slugField {
+            width: 5%; /* Adjusted width for Slug column */
+        }
+
+        #langField {
+            width: 5%; /* Adjusted width for Translation column */
+        }
+
+        #urlField {
+            width: 5%; /* Adjusted width for Translation column */
+        }
+
+        /* Added styles for non-editable rows */
+        #editableTable tbody .EditableRow {
+            //background-color: #ddd; /* Background color for non-editable rows */
+            border-bottom: 1px solid #ddd;
+            background-color: #f9f9f9; /* Same background color for all fields */
+        }
+
+        #editableTable tbody .nonEditableRow {
+            //background-color: #ddd; /* Background color for non-editable rows */
+            //background-color: #f9f9f9; /* Same background color for all fields */
+        }
+
+        #editableTable tbody .nonEditableRow td[contenteditable="true"] {
+            //border: none; /* Remove border for editable cells in non-editable rows */
+            border-bottom: 1px solid #ddd;
+            background-color: #f9f9f9; /* Same background color for all fields */
+        }
+
+        #editableTable tbody .nonEditableRow .removeBtn {
+            display: none; /* Hide Remove button in non-editable rows */
+        }
+
+</script>

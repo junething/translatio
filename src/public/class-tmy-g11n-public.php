@@ -119,7 +119,8 @@ class TMY_G11n_Public {
 		//wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-public.js', array( 'jquery' ), $this->version, false );
 
                 wp_localize_script( $this->plugin_name, 'tmy_g11n_ajax_obj',
-                                    array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+                                    array( 'ajax_url' => admin_url( 'admin-ajax.php' ),
+                                           'img_url' => plugins_url('includes', __DIR__) ) );
 	}
 
         public function g11n_option_editor_change($use_block_editor, $post) {
@@ -164,75 +165,79 @@ class TMY_G11n_Public {
 
         }
 
-	public function g11n_translate_slug($url_slug, $language) {
-
-            // todo, to make here more robust
-            $current_translate_slug = esc_attr(get_option('g11n_translate_slug','No'));
-            if (strcmp($current_translate_slug, "")===0) {
-                $current_translate_slug = "No";
-            }
-            if ($current_translate_slug === "Yes") {
-                $slugs_mappings_configs = get_option('g11n_slugs_mappings_config', array());
-                if (is_array($slugs_mappings_configs)) {
-                    if (array_key_exists($language, $slugs_mappings_configs)) {
-                        $url_slug = str_replace($slugs_mappings_configs[$language]["url_orig"],
-                                           $slugs_mappings_configs[$language]["url"],
-                                           $url_slug);
-                    }
-                }
-            }
-            return $url_slug;
-
-        }
         function tmy_rewrite_permalink_links( $permalink ) {
 
             if (! is_admin()) {
-
-                $site_url = get_site_url();
-
-                $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
-
-                $lang_code = get_locale();
-
-                $lang_code = strtolower(str_replace('_', '-', $lang_code));
-
-                $lang_path = explode('/', str_replace($site_url, '', $permalink))[1];
-                $lang_path = str_replace('-', '_', $lang_path);
-
-                if (! array_search(strtolower($lang_path), array_map('strtolower',$all_configed_langs))) {
-                    $ret = str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $permalink);
-                    $ret = $this->g11n_translate_slug($ret, $lang_code);
-                    if ( WP_TMY_G11N_DEBUG ) {
-                        error_log("rewrite url " . $permalink. "->" . $ret); 
-                    }
-	            return esc_url($ret);
-                }
+                return($this->tmy_internal_rewrite_url($permalink));
             }
             return $permalink;
         }
+
+        function tmy_internal_rewrite_url( $url ) {
+
+            //error_log("IN tmy_internal_rewrite_url $url " . get_home_url());
+            $site_url = home_url();
+            if (strpos($url, $site_url) === false) {
+                return $url;
+            }
+
+            if (strcmp(trim(get_option('g11n_seo_url_enable')),'Yes')===0) {
+                //error_log("IN tmy_internal_rewrite_url $url");
+                $conf_lans = get_option('g11n_additional_lang');
+                //a:3:{s:7:"English";s:5:"en_US";s:14:"Chinese(China)";s:5:"zh_CN";s:18:"Portuguese(Brazil)";s:5:"pt_BR";}
+
+                if (is_array($conf_lans) && (count($conf_lans) > 0)) {
+                    $conf_codes = array_values($conf_lans);
+                    $pattern = '/' . implode('|', array_map('preg_quote', $conf_lans, array_fill(0, count($conf_lans), '/'))) . '/i';
+                    $pattern = strtolower(str_replace('_', '-', $pattern));
+                    if (preg_match($pattern, $url, $matches) !== 1) { 
+                        // the url does not contain any language code
+                        $lang_code = strtolower(str_replace('_', '-', get_locale()));
+                        $site_url = get_site_url();
+                        $url = str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $url);
+                        $url_lang = $lang_code;
+                    } else {
+                        $url_lang = $matches[0];
+                    }
+                    //error_log("                           " . $pattern . " " . $url_lang);
+                    $trans_slug_conf = esc_attr(get_option('g11n_translate_slug','No'));
+                    if (strcmp($trans_slug_conf, "")===0) {
+                        $trans_slug_conf = "No";
+                    }
+                    if ($trans_slug_conf === "Yes") {
+                        $slugs_confs = get_option('g11n_slugs_mappings_config', array());
+                        if (!is_array($slugs_confs)) {
+                            $slugs_confs = array();
+                        }
+                        $slugs_confs_extra = get_option('g11n_slugs_mappings_config_extra', array());
+                        if (!is_array($slugs_confs_extra)) {
+                            $slugs_confs_extra = array();
+                        }
+                        $slugs_confs = array_merge_recursive($slugs_confs, $slugs_confs_extra);
+                        //a:2:{s:5:"zh-cn";a:2:{s:3:"url";a:1:{i:0;s:8:"/关于/";}s:8:"url_orig";a:1:{i:0;s:7:"/about/";}}
+                        //     s:5:"pt-br";a:2:{s:3:"url";a:1:{i:0;s:7:"/sobre/";}s:8:"url_orig";a:1:{i:0;s:7:"/about/";}}}
+    
+                        if (is_array($slugs_confs)) {
+                            if (array_key_exists($url_lang, $slugs_confs)) {
+                                $slugs_orig = $slugs_confs[$url_lang]["url_orig"];
+                                foreach ($slugs_orig as &$value) { $value = "/" . $url_lang . "/" . $value . "/"; }
+                                $slugs_url = $slugs_confs[$url_lang]["url"];
+                                foreach ($slugs_url as &$value) { $value = "/" . $url_lang . "/" . $value . "/"; }
+    
+                                $url = str_replace($slugs_orig, $slugs_url, $url);
+                            }
+                        }
+                    }
+                }
+                //error_log("                         -> $url");
+            }
+            return $url;
+        }
+
         function rewrite_tag_permalink_post_link( $permalink, $post, $leavename ) {
 
             if (! is_admin()) {
-                $site_url = get_site_url();
-
-                $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
-
-		if (is_array($all_configed_langs)) {
-                    $lang_code = get_locale();
-
-                    $lang_code = strtolower(str_replace('_', '-', $lang_code));
-                    $lang_path = explode('/', str_replace($site_url, '', $permalink))[1];
-                    $lang_path = str_replace('-', '_', $lang_path);
-                    if (! array_search(strtolower($lang_path), array_map('strtolower',$all_configed_langs))) {
-                        $ret = str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $permalink);
-                        $ret = $this->g11n_translate_slug($ret, $lang_code);
-
-                        if ( WP_TMY_G11N_DEBUG ) {
-                            error_log("rewrite url " . $permalink. "->" . $ret); 
-                        }
-	                return esc_url($ret);
-                    }
-		}
+                return($this->tmy_internal_rewrite_url($permalink));
             }
             return $permalink;
         }
@@ -244,7 +249,7 @@ class TMY_G11n_Public {
             if (! is_admin()) {
 
                 if (session_status() !== PHP_SESSION_ACTIVE) {
-                      session_start();
+                      @session_start();
     		}
 
                 $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
@@ -289,7 +294,7 @@ class TMY_G11n_Public {
                 if (strcmp($new_lang, "")===0) {
 
                     $_SESSION['g11n_language'] = $current_lang;
-        	    setcookie('g11n_language', $current_lang, strtotime('+1 day'));
+        	    @setcookie('g11n_language', $current_lang, strtotime('+1 day'));
 
                     if (strcmp($current_lang_code, "en_US") === 0) {
 		        unload_textdomain($template_name);
@@ -940,37 +945,14 @@ public function g11n_add_floating_menu() {
 
         public function g11n_fusion_default_args_filter($this_args, $type, $args) {
 
-                    //error_log("g11n_fusion_default_args_filter all type: " . $type);
-                    //error_log("g11n_fusion_default_args_filter all this_args: " . json_encode($this_args) );
             if ($type === "fusion_button") {
                 if (! empty($this_args["link"])) {
-                
-                    $site_url = get_site_url();
-                    $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
-                    $lang_code = get_locale();
-                    $lang_code = strtolower(str_replace('_', '-', $lang_code));
-                    
-                    $new_link = $this_args["link"];
-                    $lang_path = explode('/', str_replace($site_url, '', $new_link))[1];
-                    $lang_path = str_replace('-', '_', $lang_path);
-                    if (! array_search(strtolower($lang_path), array_map('strtolower',$all_configed_langs))) {
-                        $new_link = str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $new_link);
-                        $new_link = $this->g11n_translate_slug($new_link, $lang_code);
-                        if ( WP_TMY_G11N_DEBUG ) {
-                            error_log("rewrite url " . $this_args["link"]. "->" . $new_link);
-                        }
-                    }
-                    error_log("g11n_fusion_default_args_filter fusion_button link: " . $this_args["link"]);
-                    $this_args["link"] = $new_link;
+                    $this_args["link"] = $this->tmy_internal_rewrite_url($this_args["link"]);
                 }
             }
             if ($type === "fusion_title") {
                 if (! empty($this_args["link_url"])) {
-                    error_log("g11n_fusion_default_args_filter fusion_tittle link_url: " . $this_args["link_url"]);
-                    error_log("g11n_fusion_default_args_filter fusion_tittle link: " . $this_args["link"]);
-                    //error_log("g11n_fusion_default_args_filter 2 this_args: " . json_encode($this_args) );
-                    //error_log("g11n_fusion_default_args_filter 3 args: " . json_encode($args) );
-                    $this_args["link_url"] = $this_args["link_url"] . "/mei/";
+                    $this_args["link_url"] = $this->tmy_internal_rewrite_url($this_args["link_url"]);
                 }
             }
 
@@ -1011,7 +993,7 @@ public function g11n_add_floating_menu() {
 
             if ((strcmp($type, "fusion_text")===0) && isset($args["dynamic_params"])) {
 
-                error_log("g11n_fusion_shortcode_content_filter content: " . $type . " " . $content );
+                //error_log("g11n_fusion_shortcode_content_filter content: " . $type . " " . $content );
                 $dp_var = json_decode(base64_decode($args["dynamic_params"]), true);
                 $language_options = get_option('g11n_additional_lang');
                 $g11n_current_language = $this->translator->get_preferred_language();
@@ -1643,6 +1625,16 @@ public function g11n_add_floating_menu() {
             $current_url = home_url( $wp->request );
             echo '<link rel="alternate" href="' . esc_url($current_url) . '" hreflang="x-default" />' . "\n";
         }
+        public function tmy_translation_get_text_filter( $text ) {
+            //error_log("tmy_translation_get_text_filter: " . $text);
+            $language_options = get_option('g11n_additional_lang');
+            $g11n_current_language = $this->translator->get_preferred_language();
+            if (! is_null($language_options)) {
+                $lang = $language_options[$g11n_current_language];
+                $text = $this->tmy_text_translator(wp_trim_words($text), $lang);
+            }
+            return $text;
+        }
         public function tmy_translation_get_taxonomy_filter( $wp_term, $taxonomy ) {
 
             //error_log("In tmy_translation_get_taxonomy_filter: " . json_encode($wp_term));
@@ -1673,47 +1665,20 @@ public function g11n_add_floating_menu() {
         }
         public function tmy_wp_nav_menu_item_filter( $items, $args ) {
 
-            //error_log("In tmy_wp_nav_menu_item_filter args: " . json_encode($args));
-            //error_log("In tmy_wp_nav_menu_item_filter item: " . json_encode($items));
             $pattern = '/href="([^"]+)"/';
 
             if (preg_match_all($pattern, $items, $matches)) {
                 $href_list = array();
                 $href_list_new = array();
-                error_log("In tmy_wp_nav_menu_item_filter matches: " . json_encode($matches));
 
                 foreach($matches[1] as $match) {
-                    //$site_url = get_site_url();
-                    //$lang_code = strtolower(str_replace('_', '-', get_locale()));
-                    //$lang_path = explode('/', str_replace($site_url, '', $match))[1];
-                    //$lang_path = str_replace('-', '_', $lang_path);
-                    //if (! preg_match($lang_code, $match)) {
-                    //    $href_list[] = $match;
-                    //    $match = str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $match);
-                    //    //$match = $this->g11n_translate_slug($match, $lang_code);
-                    //    $href_list_new[] = $match;
-                    //}
-
-                    $site_url = get_site_url();
-                    $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
-                    $lang_code = get_locale();
-                    $lang_code = strtolower(str_replace('_', '-', $lang_code));
-
-                    $lang_path = explode('/', str_replace($site_url, '', $match))[1];
-                    $lang_path = str_replace('-', '_', $lang_path);
-                    if (! array_search(strtolower($lang_path), array_map('strtolower',$all_configed_langs))) {
+                    $new_link = $this->tmy_internal_rewrite_url($match);
+                    if ($new_link !== $match) {
                         $href_list[] = $match;
-                        $match = str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $match);
-                        $match = $this->g11n_translate_slug($match, $lang_code);
-                        $href_list_new[] = $match;
-                        if ( WP_TMY_G11N_DEBUG ) {
-                            error_log("rewrite url " . $this_args["link"]. "->" . $new_link);
-                        }
+                        $href_list_new[] = $new_link;
                     }
                 }
                 if (count($href_list)>0) {
-                    error_log("In tmy_wp_nav_menu_item_filter href_list: " . json_encode($href_list));
-                    error_log("In tmy_wp_nav_menu_item_filter href_list_new: " . json_encode($href_list_new));
                     $items = str_replace($href_list, $href_list_new, $items);
                 }
             }
@@ -1730,7 +1695,7 @@ public function g11n_add_floating_menu() {
         }
         public function tmy_nav_menu_item_title_filter( $title, $menu_item, $args, $depth ) {
 
-            //error_log("In tmy_nav_menu_item_title_filter: " . json_encode($title) . " " . json_encode($menu_item));
+            //error_log("MEI MEI In tmy_nav_menu_item_title_filter: " . json_encode($title) . " " . json_encode($menu_item));
             global $wpdb;
             $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($title) . "\" and post_status=\"private\"";
             $result = $wpdb->get_results($sql);
@@ -1870,15 +1835,17 @@ public function g11n_add_floating_menu() {
                     }
                 }
                 if  ($current_seo_option == 'Yes') {
-                    if ($url_arr['host'] === $site_url_arr['host']) {
-                        $lang_code = get_locale();
-                        $lang_code = strtolower(str_replace('_', '-', $lang_code));
+                    if ((isset($url_arr['host'])) && (isset($site_url_arr['host']))) {
+                        if ($url_arr['host'] === $site_url_arr['host']) {
+                            $lang_code = get_locale();
+                            $lang_code = strtolower(str_replace('_', '-', $lang_code));
 
-                        $lang_path = explode('/', str_replace($site_url, '', $menu_item->url))[1];
-                        $lang_path = str_replace('-', '_', $lang_path);
+                            $lang_path = explode('/', str_replace($site_url, '', $menu_item->url))[1];
+                            $lang_path = str_replace('-', '_', $lang_path);
 
-                        if (! array_search(strtolower($lang_path), array_map('strtolower',$all_configed_langs))) {
-                            $menu_item->url = esc_url(str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $menu_item->url));
+                            if (! array_search(strtolower($lang_path), array_map('strtolower',$all_configed_langs))) {
+                                $menu_item->url = esc_url(str_replace($site_url, $site_url . '/' . esc_attr($lang_code), $menu_item->url));
+                            }
                         }
                     }
                 }
@@ -2053,14 +2020,17 @@ public function g11n_add_floating_menu() {
             if ( isset( $_POST['operation'] )) {
 
                 global $wpdb;
+                $default_lang = get_option('g11n_default_lang');
+                $language_options = get_option('g11n_additional_lang');
+                $default_lang_code=$language_options[$default_lang];
 
                 switch ( esc_attr($_POST['operation']) ) {
                     case 'tmy_ops_get_translation_table':
-                        error_log('tmy_ops_get_translation_table: ' . json_encode($_POST));
+                        //error_log('tmy_ops_get_translation_table: ' . json_encode($_POST));
                         //{"action":"tmy_g11n_frontend_jquery_call","operation":"tmy_ops_get_translation_table","language":"zh-cn","referenceid":"2422"}
                         $referenceid = esc_sql($_POST['referenceid']);
-
                         $text_lang = esc_sql($_POST['language']);
+
                         $parts = explode('-', $text_lang);
                         if (count($parts) > 1) {
                             $lastPart = array_pop($parts);
@@ -2102,7 +2072,7 @@ public function g11n_add_floating_menu() {
                          //           }
                          //       }
                          //   }
-                            error_log("TRANSLATION TABLE: " . json_encode($return_arr));
+                            //error_log("TRANSLATION TABLE: " . json_encode($return_arr));
                         }
                         break;
 
@@ -2121,9 +2091,6 @@ public function g11n_add_floating_menu() {
 
                         $return_arr = array();
 
-                        $default_lang = get_option('g11n_default_lang');
-                        $language_options = get_option('g11n_additional_lang');
-                        $default_lang_code=$language_options[$default_lang];
 
                         $orig_post_id = 0;
                         if ($default_lang_code === $lang_code) {
@@ -2145,8 +2112,8 @@ public function g11n_add_floating_menu() {
                             }
                         }
                         //$g11n_current_language = $this->translator->get_preferred_language();
-                        error_log("JQUERY get_translation sql: " . $sql);
-                        error_log("JQUERY get_translation lang_code: " . $lang_code . " orig post id: " . $orig_post_id);
+                        //error_log("JQUERY get_translation sql: " . $sql);
+                        //error_log("JQUERY get_translation lang_code: " . $lang_code . " orig post id: " . $orig_post_id);
 
                         if (is_array($language_options)) {
                             foreach ($language_options as $language => $code) {
@@ -2172,14 +2139,14 @@ public function g11n_add_floating_menu() {
                         } else {
                             $return_message .= "New Translation";
                         }
-error_log("RETURN ST: " . json_encode($return_arr));
                         break;
 
                     case 'tmy_ops_save_page_translation':
+
                         //error_log("tmy_ops_save_page_translation: " . json_encode($_POST));
                         $object_var = esc_sql($_POST['obj']);
                         $referenceid = esc_sql($_POST['referenceid']);
-                        error_log("tmy_ops_save_page_translation id: " . $referenceid);
+                        //error_log("tmy_ops_save_page_translation id: " . $referenceid);
                         $holder_id = 0;
                         $page_place_holder_title = $referenceid . "-page-translation";
 
@@ -2187,10 +2154,10 @@ error_log("RETURN ST: " . json_encode($return_arr));
                         foreach($object_var as $item) {
                             $page_table .= "<!--" . $item . "-->" . $item . "<!--end--><br>\n";
                         }
-                        error_log("page table:" . $page_table);
+                        //error_log("page table:" . $page_table);
 
                         $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($page_place_holder_title) . "\" and post_status=\"private\"";
-                        error_log("tmy_ops_save_page_translation sql: " . $sql);
+                        //error_log("tmy_ops_save_page_translation sql: " . $sql);
                         $result = $wpdb->get_results($sql);
                         if (! isset($result[0]->ID)) {
                              $holder_id = wp_insert_post(
@@ -2219,7 +2186,15 @@ error_log("RETURN ST: " . json_encode($return_arr));
                         break;
 
                     case 'tmy_ops_save_translation':
-                        $object_var = esc_sql($_POST['obj']);
+                        if (isset($_POST['obj'])) {
+                            $object_var = $_POST['obj']; 
+                        } else {
+                            $object_var = array();
+                        }
+                        $sentencelist = $_POST['sentencelist'];
+                        //error_log("tmy_ops_save_translation sentencelist: " . count($sentencelist));
+                        //error_log("tmy_ops_save_translation object_var: " . count($object_var));
+                        //if (! is_array($object_var)) { $object_var = array(); }
                         $text_lang = esc_sql($_POST['language']);
                         $referenceid = esc_sql($_POST['referenceid']);
                         $parts = explode('-', $text_lang);
@@ -2233,14 +2208,15 @@ error_log("RETURN ST: " . json_encode($return_arr));
                         $holder_id = 0;
                         $page_place_holder_title = $referenceid . "-page-translation";
                         $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($page_place_holder_title) . "\" and post_status=\"private\"";
-error_log("Save translation: " . $sql);
                         $result = $wpdb->get_results($sql);
 
                         //$orig_array = array_keys($object_var);
                         $page_table = "";
                         $translation_table = "";
+                        foreach ($sentencelist as $sentence) {
+                            $page_table .= "<!--" . $sentence . "-->" . $sentence . "<!--end--><br>\n";
+                        }
                         foreach($object_var as $key => $value) {
-                            $page_table .= "<!--" . $key . "-->" . $key . "<!--end--><br>\n";
                             $translation_table .= "<!--" . $key . "-->" . $value . "<!--end--><br>\n";
                         }
 
@@ -2267,19 +2243,15 @@ error_log("Save translation: " . $sql);
                                        'post_type'  => "post"
                                  ));
                         }
-error_log("Save translation: holder id " . $holder_id);
                         if ($holder_id <> 0) {
                             //get the corresponding translation id, update the translation
                             $translation_id = $this->translator->get_translation_id($holder_id, $lang_code, "post");
-                            $translation_array = array_values($object_var);
-                            error_log("translation id: " . json_encode($translation_id));
-                            error_log("translation array: " . json_encode($translation_array));
+                            //error_log("translation id: " . json_encode($translation_id));
                             if (isset($translation_id)) {
                                  wp_insert_post(
                                   array(
                                        'ID' => $translation_id,
                                        'post_title'    => esc_attr($page_place_holder_title),
-                                       //'post_content'  => implode("<br>\n", $translation_array),
                                        'post_content'  => $translation_table,
                                        'post_status' => 'private',
                                        'post_type'  => "g11n_translation"
@@ -2292,6 +2264,7 @@ error_log("Save translation: holder id " . $holder_id);
             }
             echo json_encode(array("return_data" => $return_arr,
                                    "return_code" => $return_code,
+                                   "return_is_default_lang" => ($default_lang_code === $lang_code) ? true : false,
                                    "return_message" => $return_message
                                   )
                             );
