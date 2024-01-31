@@ -261,7 +261,7 @@ class TMY_G11n {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 1 );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 1 );
 
-		$this->loader->add_action( 'init', $plugin_public, 'G11nStartSession', 1 );
+		$this->loader->add_action( 'init', $plugin_public, 'G11nStartSession', 999 );
 		//$this->loader->add_action( 'init', $plugin_public, 'g11n_setcookie' );
 		$this->loader->add_action( 'wp_login', $plugin_public, 'G11nEndSession' );
 		$this->loader->add_action( 'wp_logout', $plugin_public, 'G11nEndSession' );
@@ -274,7 +274,7 @@ class TMY_G11n {
 		//$this->loader->add_action( 'save_post', $plugin_public, 'g11n_post_saved_notification', 10, 2 );
 
 	        $this->loader->add_action( 'init', $plugin_public, 'g11n_create_post_type_translation' );
-		$this->loader->add_action( 'init', $plugin_public, 'g11n_create_rewrite_rule', 10, 0 );
+		//$this->loader->add_action( 'init', $plugin_public, 'g11n_create_rewrite_rule', 10, 0 );
 
 		$this->loader->add_action( 'wp_ajax_tmy_g11n_frontend_jquery_call', $plugin_public, 'tmy_g11n_frontend_jquery_call' );
 		$this->loader->add_action( 'wp_ajax_nopriv_tmy_g11n_frontend_jquery_call', $plugin_public, 'tmy_g11n_frontend_jquery_call' );
@@ -317,7 +317,7 @@ class TMY_G11n {
 		//$this->loader->add_filter( 'get_the_excerpt', $plugin_public, 'g11n_excerpt_filter' );
 		$this->loader->add_filter( 'the_posts', $plugin_public, 'g11n_the_posts_filter' );
 		//$this->loader->add_filter( 'the_post', $plugin_public, 'g11n_the_post_filter', 10, 2 );
-		$this->loader->add_filter( 'wpml_object_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
+		$this->loader->add_filter( 'wpml_object_id', $plugin_public, 'g11n_ext_translator_filter', 999, 4 );
 		$this->loader->add_filter( 'fusion_layout_section_id', $plugin_public, 'g11n_ext_translator_filter', 10, 4 );
                 $this->loader->add_filter( 'avada_menu_meta', $plugin_public, 'g11n_ext_menumeta_filter', 10, 2 );
                 $this->loader->add_filter( 'fusion_shortcode_content', $plugin_public, 'g11n_fusion_shortcode_content_filter', 999, 3 );
@@ -330,12 +330,15 @@ class TMY_G11n {
 		$this->loader->add_filter( 'pre_update_option_blogdescription', $plugin_public, 'g11n_pre_option_blogdescription'); 
 
                 $this->loader->add_filter( 'locale', $plugin_public, 'g11n_locale_filter', 10);
+                $this->loader->add_filter( 'query_vars', $plugin_public, 'g11n_query_vars_filter', 1, 1);
+                //$this->loader->add_action( 'parse_request', $plugin_public, 'g11n_parse_request_action');
 
                 $this->loader->add_filter( 'use_block_editor_for_post', $plugin_public, 'g11n_option_editor_change', 10, 2);
                 //$this->loader->add_filter( 'http_request_args', $plugin_public, 'tmy_plugin_http_request_args', 99, 2 );
 
 		$this->loader->add_action( 'init', $plugin_public, 'tmy_g11n_blocks_init');
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'tmy_g11n_template_redirect');
+                remove_filter('template_redirect', 'redirect_canonical');
 		//$this->loader->add_filter( 'site_url', $plugin_public, 'tmy_g11n_site_url', 10, 2);
 
                 $this->loader->add_filter( 'fusion_faq_all_filter_name', $plugin_public, 'tmy_translation_get_text_filter', 10, 1 );
@@ -364,13 +367,13 @@ class TMY_G11n {
 
                 $this->loader->add_action( 'woocommerce_new_order', $plugin_public, 'tmy_woocommerce_new_order', 10, 2 );
                 $this->loader->add_filter( 'nav_menu_item_title', $plugin_public, 'tmy_nav_menu_item_title_filter', 10, 4 );
-                $this->loader->add_filter( 'nav_menu_item_args', $plugin_public, 'tmy_nav_menu_item_args_filter', 10, 3 );
+                //$this->loader->add_filter( 'nav_menu_item_args', $plugin_public, 'tmy_nav_menu_item_args_filter', 10, 3 );
 
                 $this->loader->add_filter( 'nav_menu_item_filter', $plugin_public, 'tmy_nav_menu_item_filter', 999, 3 );
                 $this->loader->add_filter( 'wp_nav_menu_items', $plugin_public, 'tmy_wp_nav_menu_item_filter', 10, 2 );
                 $this->loader->add_filter( 'wp_nav_menu_objects', $plugin_public, 'tmy_nav_menu_objects_filter', 999, 2);
 
-                $this->loader->add_filter( 'nav_menu_link_attributes', $plugin_public, 'tmy_nav_menu_link_attributes_filter', 15, 4);
+                //$this->loader->add_filter( 'nav_menu_link_attributes', $plugin_public, 'tmy_nav_menu_link_attributes_filter', 15, 4);
 
                 if (is_plugin_active('wordpress-seo/wp-seo.php')) {
 		    $this->loader->add_filter( 'wpseo_metadesc', $plugin_public, 'g11n_the_seo_metadesc_filter',10, 2);

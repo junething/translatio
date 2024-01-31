@@ -1127,8 +1127,10 @@ class TMY_G11n_Admin {
                         var rules_box_div = document.getElementById('tmy_seo_rules_box');
 
                         if (type === "Yes") {
-                            example_urls_div.style.display = "block";
-                            rules_box_div.style.display = "block";
+                            //example_urls_div.style.display = "block";
+                            //rules_box_div.style.display = "block";
+                            example_urls_div.style.display = "none";
+                            rules_box_div.style.display = "none";
                         }
                         if (type === "No") {
                             example_urls_div.style.display = "none";
@@ -1165,12 +1167,14 @@ class TMY_G11n_Admin {
 
 
               ?> 
+<!--
                         Depends on your specific configuration, here is the example .htaccess file if you are using Apache, lines between "# BEGIN TMY G11N RULES" and "# END TMY G11N RULES" are newly added. Your .htaccess might look different, in most cases, adding these new lines will work.<br><br>
                         Let's know if you need help, SEO friendly URLs could get tricky sometimes.<br><br>
 
 
 
                         Current .htaccess file: <?php echo esc_attr($htaccess_permission);?> 
+
 <div style="width: 1000px; padding: 10px; border: 2px solid black; margin: 0;"> 
 <b># BEGIN TMY_G11N_RULES <br>
 &lt;IfModule mod_rewrite.c&gt; <br>
@@ -1195,7 +1199,9 @@ RewriteCond %{REQUEST_FILENAME} !-d <br>
 RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
 &lt;/IfModule&gt; <br>
 
-</div></div>
+</div>
+-->
+</div>
                 </td>
                 </tr>
 
@@ -1276,7 +1282,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
             ?>
             <div class="wrap"><h1> <img style="vertical-align:middle" src="<?php echo plugin_dir_url( __FILE__ ) . 'include/translatio_round.svg'; ?>" width="32" alt="T"> <?php esc_html_e('Translaio Slugs Manager', 'tmy-globalization') ?></h1>
                <br>
-               Rules that are not editable are automatically generated based on translation pages, to change, visit each tranlsation, edit the slug field.
+               Detected rules are automatically generated based on translation pages, you can append to the main table, edit and save.
                <br>
                <br>
 
@@ -1284,6 +1290,7 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                    <thead>
                        <tr>
                            <th id="langField">Language</th>
+                           <th id="typeField">Type</th>
                            <th id="urlField">URL</th>
                            <th id="slugField">Slug</th>
                            <th class="actionColumn"></th>
@@ -1295,12 +1302,12 @@ RewriteRule . <?php echo esc_attr($home_root); ?>index.php [L]<br>
                </table>
                <br>
 
+               <button id="saveTable" class="button button-primary saveBtn">Save</button>
+               <button id="addRow" class="button button-primary">Add Row</button>
+               <br><br>
                <div id="detectedValuesContent">
                    <!-- Content will be dynamically generated here -->
                </div>
-
-               <button id="saveTable" class="button button-primary saveBtn">Save</button>
-               <button id="addRow" class="button button-primary">Add Row</button>
 
             <?php
         }
@@ -3341,29 +3348,87 @@ error_log("return rows: " . json_encode($q_rows));
 
             if ($current_translate_slug === "Yes") {
                 global $wpdb;
-                $results = $wpdb->get_results("select ID, post_name from {$wpdb->prefix}posts where post_name <> '' AND post_type='g11n_translation'");
+                //$results = $wpdb->get_results("select ID, post_name from {$wpdb->prefix}posts where post_name <> '' AND post_type='g11n_translation'");
+                $results = $wpdb->get_results("select ID, post_name, post_type from {$wpdb->prefix}posts 
+                                               where post_status='publish' AND ((post_type='page')or(post_type='post'))");
 
-                foreach ($results as $result) {
-                    $original_post_id = get_post_meta($result->ID, 'orig_post_id', True);
-                    $original_post_type = get_post_meta($result->ID, 'g11n_tmy_orig_type', True);
-                    $original_post_status = get_post_field('post_status', $original_post_id);
-                    $translation_language_name = get_post_meta($result->ID, 'g11n_tmy_lang', True);
-                    $translation_language_name = strtolower(str_replace('_', '-', $translation_language_name));
-                    $translation_status = get_post_meta($result->ID, 'g11n_tmy_lang_status', True);
-                    $original_post_name = get_post_field('post_name', $original_post_id);
-    
-                    if ((strcmp($original_post_type, "page")===0)
-                       && (strcmp($original_post_status, "private")!==0)
-                       ) {
-                        $slugs_mappings[] = array("lang" => $translation_language_name,
-                                             "url" => $result->post_name,
-                                             "url_orig" => esc_html($original_post_name)
-                                           );
-                        $g11n_slugs_mappings_config[$translation_language_name]["url"][] =  urldecode($result->post_name);
-                        $g11n_slugs_mappings_config[$translation_language_name]["url_orig"][] = esc_html($original_post_name );
+                $default_lang = get_option('g11n_default_lang');
+                $conf_lans = get_option('g11n_additional_lang');
+                $default_lang_code = "en-us";
+                if (is_array($conf_lans) && (count($conf_lans) > 0)) {
+                    if(isset($conf_lans[$default_lang])) {
+                        $default_lang_code = $conf_lans[$default_lang];
+                        $default_lang_code = strtolower(str_replace('_', '-', $default_lang_code));
                     }
                 }
+ 
+                foreach ($results as $result) {
 
+                    $conf_lans = get_option('g11n_additional_lang');
+                    //a:3:{s:7:"English";s:5:"en_US";s:14:"Chinese(China)";s:5:"zh_CN";s:18:"Portuguese(Brazil)";s:5:"pt_BR";}
+
+                    //$permalink = get_permalink($result->ID);
+                    $permalink = get_post_field('post_name', $result->ID);
+                    if ($permalink) {
+                        $permalink_trans = array();
+                        if (is_array($conf_lans) && (count($conf_lans) > 0)) {
+                            foreach ($conf_lans as $lan => $lang_code) {
+                                $trans_id = $this->translator->get_translation_id($result->ID,$lang_code,$result->post_type);
+	                        if (isset($trans_id)) {
+                                    $lang_code = strtolower(str_replace('_', '-', $lang_code));
+                                    $permalink_trans[$lang_code] = get_post_field('post_name', $trans_id);
+                                }
+                            }
+                        }
+                        $ancestors = get_ancestors($result->ID, $result->post_type);
+                        $ancestors = array_reverse($ancestors);
+                        foreach ($ancestors as $ancestor_id) {
+                            //$ancestor_permalink = get_permalink($ancestor_id);
+                            $ancestor_permalink = get_post_field('post_name', $ancestor_id);
+                            if ($ancestor_permalink) {
+                                $permalink = trailingslashit($ancestor_permalink) . ltrim($permalink, '/');
+                                if (is_array($conf_lans) && (count($conf_lans) > 0)) {
+                                    foreach ($conf_lans as $lan => $lang_code) {
+                                        $trans_id = $this->translator->get_translation_id($ancestor_id,$lang_code,$result->post_type);
+	                                if (isset($trans_id)) {
+                                            $lang_code = strtolower(str_replace('_', '-', $lang_code));
+                                            $permalink_tmp = get_post_field('post_name', $trans_id);
+                                            $permalink_trans[$lang_code] = trailingslashit($permalink_tmp) . 
+                                                                           ltrim($permalink_trans[$lang_code], '/');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $slugs_mappings[] = array("lang" => $default_lang_code,
+                                     "url" => esc_html($permalink),
+                                     "url_orig" => esc_html($permalink),
+                                     "type" => esc_html($result->post_type)
+                                   );
+                    $g11n_slugs_mappings_config[$default_lang_code]["url"][] =  esc_html($permalink);
+                    $g11n_slugs_mappings_config[$default_lang_code]["url_orig"][] = esc_html($permalink);
+                    $g11n_slugs_mappings_config[$default_lang_code]["type"][] = esc_html($result->post_type );
+
+                    foreach ($conf_lans as $lan => $lang_code) {
+                        $lang_code = strtolower(str_replace('_', '-', $lang_code));
+                        if (isset($permalink_trans[$lang_code]) && 
+                            (! empty($permalink_trans[$lang_code])) &&
+                            (! empty(str_replace('/', '', $permalink_trans[$lang_code])))
+
+                           ) {
+                            $slugs_mappings[] = array("lang" => $lang_code,
+                                             "url" => rtrim($permalink_trans[$lang_code], '/'),
+                                             "url_orig" => esc_html($permalink),
+                                             "type" => esc_html($result->post_type)
+                                           );
+                            $g11n_slugs_mappings_config[$lang_code]["url"][] =  urldecode(rtrim($permalink_trans[$lang_code], '/'));
+                            $g11n_slugs_mappings_config[$lang_code]["url_orig"][] = esc_html($permalink);
+                            $g11n_slugs_mappings_config[$lang_code]["type"][] = esc_html($result->post_type );
+                        }
+                    }
+                }
                 //loading g11n_slugs_mappings_config_extra
                 $conf_rules = get_option('g11n_slugs_mappings_config_extra', array());
                 if (is_array($conf_rules) && !empty($conf_rules)) {
@@ -3372,7 +3437,8 @@ error_log("return rows: " . json_encode($q_rows));
                             foreach ($mapping["url"] as $i => $url) {
                                $slugs_mappings[] = array('lang' => $lang_code,
                                              'url' => $url,
-                                             'url_orig' => $mapping["url_orig"][$i]
+                                             'url_orig' => $mapping["url_orig"][$i],
+                                             'type' => $mapping["type"][$i]
                                            );
                             }
                         }
@@ -3398,7 +3464,8 @@ error_log("return rows: " . json_encode($q_rows));
             if (strcmp($current_translate_slug, "")===0) {
                 $current_translate_slug = "No";
             }
-            $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+            //$this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+            $this->tmy_plugin_g11n_get_slugs_mapping($current_translate_slug);
 
         }
 
@@ -3411,8 +3478,11 @@ error_log("return rows: " . json_encode($q_rows));
             $current_seo_option = esc_attr($_POST["g11n_seo_url_enable"]);
             error_log("save changes: $current_translate_slug $current_seo_option");
 
-            $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
-            error_log("save admin changes done: ". json_encode(get_option('g11n_slugs_mappings_config_extra', array())));
+            $this->tmy_plugin_g11n_get_slugs_mapping($current_translate_slug);
+            $this->g11n_create_rewrite_rule();
+
+            //$this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+            //error_log("save admin changes done: ". json_encode(get_option('g11n_slugs_mappings_config_extra', array())));
 
         }
 
@@ -3468,6 +3538,44 @@ error_log("return rows: " . json_encode($q_rows));
 
         }
 
+       public function g11n_create_rewrite_rule() {
+
+#return;
+            $homepage_id = get_option('page_on_front');
+            $home_slug = get_post_field('post_name', $homepage_id);
+            //error_log("in rewrite ruels: " . $home_slug);
+
+            $conf_lans = get_option('g11n_additional_lang'); //a:3:{s:7:"English";s:5:"en_US";s:14:"Chinese(China)";s:5:"zh_CN";}
+            $conf_rules = get_option('g11n_slugs_mappings_config_extra', array());
+            if (is_array($conf_rules) && !empty($conf_rules)) {
+                foreach ($conf_rules as $lang_code => $mapping) {
+                    if (is_array($mapping["url"]) && !empty($mapping["url"])) {
+                        foreach ($mapping["url"] as $i => $url) {
+                            if ($mapping["type"][$i] === "page") {
+                                add_rewrite_rule('^' . $lang_code . '/' . $url . '$',
+                                                 'index.php?pagename=' . $mapping["url_orig"][$i] . '&g11n_tmy_lang_code=' . $lang_code,'top');
+                            }
+                            if ($mapping["type"][$i] === "post") {
+                                add_rewrite_rule('^' . $lang_code . '/' . $url . '$',
+                                                 'index.php?name=' . $mapping["url_orig"][$i] . '&g11n_tmy_lang_code=' . $lang_code,'top');
+                           }
+                        }
+                    }
+                }
+            }
+            if (is_array($conf_lans) && (count($conf_lans) > 0)) {
+                $conf_codes = array_values($conf_lans);
+                $pattern = '(' . implode('|', array_map('preg_quote', $conf_lans, array_fill(0, count($conf_lans), '/'))) . ')';
+                $pattern = strtolower(str_replace('_', '-', $pattern));
+                add_rewrite_rule('^' . $pattern . '/?$', 'index.php?pagename=' . $home_slug . '&g11n_tmy_lang_code=$matches[1]','top');
+                add_rewrite_rule('^' . $pattern . '/(.?.+?)(?:/([0-9]+))?/?$', 'index.php?pagename=$matches[2]&page=$matches[3]&g11n_tmy_lang_code=$matches[1]','top');
+                add_rewrite_rule('^' . $pattern . '/([^/]+)(?:/([0-9]+))?/?$', 'index.php?name=$matches[2]&page=$matches[3]&g11n_tmy_lang_code=$matches[1]','top');
+            }
+            flush_rewrite_rules();
+            //$wp_rewrite->flush_rules();
+        }
+
+
 	public function tmy_g11n_admin_slugs_ops() {
 
             if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
@@ -3495,7 +3603,8 @@ error_log("return rows: " . json_encode($q_rows));
                                     foreach ($mapping["url"] as $i => $url) {
                                        $main_rules[] = array('lang' => $lang_code,
                                                      'slug' => $url,
-                                                     'url' => $mapping["url_orig"][$i]
+                                                     'url' => $mapping["url_orig"][$i],
+                                                     'type' => $mapping["type"][$i]
                                                    );
                                     }
                                 }
@@ -3509,7 +3618,8 @@ error_log("return rows: " . json_encode($q_rows));
                                     foreach ($mapping["url"] as $i => $url) {
                                        $main_rules_extra[] = array('lang' => $lang_code,
                                                      'slug' => $url,
-                                                     'url' => $mapping["url_orig"][$i]
+                                                     'url' => $mapping["url_orig"][$i],
+                                                     'type' => $mapping["type"][$i]
                                                    );
                                     }
                                 }
@@ -3534,8 +3644,9 @@ error_log("return rows: " . json_encode($q_rows));
                                 if (empty($rule[0]) || empty($rule[1]) || empty($rule[2])) {
                                     continue;
                                 } else {
-                                    $slugs_config[$rule[0]]["url"][] = esc_attr($rule[2]);
-                                    $slugs_config[$rule[0]]["url_orig"][] = esc_attr($rule[1]);
+                                    $slugs_config[$rule[0]]["url"][] = esc_attr($rule[3]);
+                                    $slugs_config[$rule[0]]["url_orig"][] = esc_attr($rule[2]);
+                                    $slugs_config[$rule[0]]["type"][] = esc_attr($rule[1]);
                                 }
                             }
                         }
@@ -3550,7 +3661,8 @@ error_log("return rows: " . json_encode($q_rows));
                         if (strcmp($current_translate_slug, "")===0) {
                             $current_translate_slug = "No";
                         }
-                        $this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+                        //$this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
+                        $this->g11n_create_rewrite_rule();
 
                         if ($update_ret) {
                             $return_message .= "Rules Saved!";
