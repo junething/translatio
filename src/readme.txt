@@ -4,7 +4,7 @@ Link: https://www.translatio.io/
 Tags: translation, localization, multilingual, language, woocommerce
 Requires at least: 5.0
 Tested up to: 6.4.1
-Stable tag: 2.0.2
+Stable tag: 2.1.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -79,8 +79,8 @@ On CentOS/Feodra Linux system, the error is mostly due to the SE Linux setting w
 
 == Changelog ==
 
-= 2.0.2 =
-* init and menu url enhancements
+= 2.1.0 =
+* rewrite rules, init enhancement 
 
 = 2.0.1 =
 * html translatior, slug config etc 
