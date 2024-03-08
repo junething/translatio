@@ -192,6 +192,8 @@ class TMY_G11n {
                 $this->loader->add_filter( 'manage_g11n_translation_posts_columns', $plugin_admin,'tmy_plugin_g11n_translation_set_columns');
                 $this->loader->add_filter( 'manage_edit-g11n_translation_sortable_columns', $plugin_admin,'tmy_plugin_g11n_translation_set_sortable');
                 $this->loader->add_action( 'manage_g11n_translation_posts_custom_column', $plugin_admin,'tmy_plugin_g11n_translation_set_columns_value',10,2);
+                //$this->loader->add_action( 'bulk_actions-edit-g11n_translation', $plugin_admin,'tmy_plugin_g11n_translation_bulk_actions',10,1);
+                //$this->loader->add_filter( 'handle_bulk_actions-edit-g11n_translation', $plugin_admin,'tmy_plugin_g11n_translation_bulk_actions_handler',10,3);
 
                 $this->loader->add_filter( 'manage_pages_columns', $plugin_admin,'tmy_plugin_page_set_columns');
                 $this->loader->add_action( 'manage_pages_custom_column', $plugin_admin,'tmy_plugin_post_set_columns_value',10,2);

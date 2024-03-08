@@ -75,8 +75,10 @@ class TMY_G11n_Admin {
 		 * class.
 		 */
 
-                if($_GET["page"] === "tmy-g11n-slugs-menu"){
-		    wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tmy-g11n-admin-slugs-page.css', array(), $this->version, 'all' );
+                if (isset($_GET["page"])) {
+                    if($_GET["page"] === "tmy-g11n-slugs-menu"){
+		        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tmy-g11n-admin-slugs-page.css', array(), $this->version, 'all' );
+                    }
                 } else {
 		    wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tmy-g11n-admin.css', array(), $this->version, 'all' );
                 }
@@ -101,9 +103,10 @@ class TMY_G11n_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
-                if($_GET["page"] === "tmy-g11n-slugs-menu"){
-		    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-admin-slugs-page.js', array( 'jquery' ), $this->version, false );
+                if (isset($_GET["page"])) {
+                    if($_GET["page"] === "tmy-g11n-slugs-menu"){
+		        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-admin-slugs-page.js', array( 'jquery' ), $this->version, false );
+                    }
                 } else {
 		    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tmy-g11n-admin.js', array( 'jquery' ), $this->version, false );
                 }
@@ -2342,6 +2345,7 @@ error_log("return rows: " . json_encode($q_rows));
 		//error_log("create project optional lang list: " . json_encode($lang_list));
 
 		$rest_url = "https://members.translatio.io/api/project/" . $project_name . "/version/" . $version_num . "/locales";
+		//$rest_url = "http://localhost:3000/rest/project/" . $project_name . "/version/" . $version_num . "/locales";
 
                 /*******************************************************************/
                 $args = array(
@@ -3094,6 +3098,96 @@ error_log("return rows: " . json_encode($q_rows));
             return $bulk_actions;
         }
 
+        function tmy_plugin_g11n_translation_bulk_actions( $bulk_actions ) {
+            $bulk_actions['apply_html_translations'] = __( 'Apply HTML Translations', 'tmy-globalization');
+            return $bulk_actions;
+        }
+
+        function tmy_plugin_g11n_translation_bulk_actions_handler( $redirect_to, $doaction, $post_ids ) {
+            if ( $doaction === 'apply_html_translations' ) {
+                $result = '';
+                foreach ( $post_ids as $post_id ) {
+                    $match_count = 0;
+                    $post_title = get_the_title($post_id);
+                    if (preg_match('/^(\d+)-page-translation$/', $post_title, $title_matches)) {
+                        $page_id = $title_matches[1];
+                        $post_content = get_post_field('post_content', $post_id);
+                        $lines = explode("<br>", $post_content);
+                        $valid_trans_pattern = array();
+                        $valid_trans_replacement = array();
+                        foreach ($lines as $line) {
+                            preg_match('/<!--(.*?)-->(.*?)<!--end-->/', $line, $matches);
+                            if (count($matches) > 1) {
+                                if ($matches[1] !== $matches[2]) {
+                                    //$valid_trans_pattern[] = $matches[1];
+                                    $valid_trans_pattern[] = "/\b" . preg_quote($matches[1], '/') . "\b/";
+                                    $valid_trans_replacement[$matches[1]] = $matches[2];
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        error_log("LINES: " . json_encode($valid_trans_pattern));
+                        error_log("LINES: " . json_encode($valid_trans_replacement));
+                      
+                        $dep_list = array();
+                        $dep_queue = array();
+                        $dep_queue[] = $page_id;
+                        while (count($dep_queue) > 0) {
+                            $dep_post_id = array_shift($dep_queue);
+                            $dep_post_content = get_post_field('post_content', $dep_post_id);
+                            $dep_post_id_need_update = false;
+                            $dep_post_content =
+                                preg_replace_callback($valid_trans_pattern, function ($matches) use (&$match_count,  
+                                                                                                     &$valid_trans_replacement,
+                                                                                                     &$dep_post_id_need_update,
+                                                                                                     &$dep_post_id) {
+                                $dep_post_id_need_update = true;
+                                $match_count = $match_count + 1;
+                                error_log("$dep_post_id MATCHED " . $matches[0]);
+                                error_log("-------------------> " . $valid_trans_replacement[$matches[0]]);
+                                return $valid_trans_replacement[$matches[0]];
+                                //return $matches[0];
+                            }, $dep_post_content);
+
+                            $pattern = "/fusion_global id=\"([^\]]*)\"/";
+                            preg_match_all($pattern, $dep_post_content, $dep_matches);
+                            foreach ($dep_matches[1] as $global_id) {
+                                if (! in_array($global_id, $dep_queue)) {
+                                    $dep_queue[] = $global_id;
+                                }
+                            }
+                            $dep_list[] = $dep_post_id;
+                            if ($dep_post_id_need_update) {
+                                $post_data = array(
+                                    'ID'           => $dep_post_id,
+                                    'post_content' => $dep_post_content,
+                                );
+                                $post_updated = wp_update_post($post_data);
+                                if (is_wp_error($post_updated)) {
+                                    $error_message = $post_updated->get_error_message();
+                                    $result .= "[" . $dep_post_id . "] Updated With Error.<br> ";
+                                    error_log("Error updating post content: $error_message");
+                                } else {
+                                    $result .= "[" . $dep_post_id . "] Updated Successfuly.<br> ";
+                                    error_log("Post content updated successfully");
+                                }
+                            }
+                        }
+                        //$result .= " " . $post_id . "->" . implode(",", $dep_list);
+
+                    } else {
+                        continue;
+                    }
+                }
+                $result .= " matched: $match_count <br>";
+                //$redirect_to = add_query_arg( 'start_sync_tranlations', count( $post_ids ), $redirect_to );
+                $redirect_to = add_query_arg( 'apply_html_translations', $result, $redirect_to );
+            }
+            return $redirect_to;
+        }
+
+
         function tmy_plugin_g11n_bulk_action_handler( $redirect_to, $doaction, $post_ids ) {
 
             if ( $doaction === 'start_sync_tranlations' ) {
@@ -3175,8 +3269,9 @@ error_log("return rows: " . json_encode($q_rows));
 
         function tmy_plugin_g11n_admin_notice() {
 
-            if ((strcmp(get_current_theme(), "Avada") === 0) && (strcmp($_GET["page"], "avada-library") === 0)) {
-               $message_for_avada_page= __('Visit', 'tmy-globalization'). ' <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=fusion_element' . 
+            if (isset($_GET["page"])) {
+                if ((strcmp(get_current_theme(), "Avada") === 0) && (strcmp($_GET["page"], "avada-library") === 0)) {
+                   $message_for_avada_page= __('Visit', 'tmy-globalization'). ' <a href="' . get_home_url() . '/wp-admin/edit.php?post_type=fusion_element' . 
                                '">' . __('here ', 'tmy-globalization') . '</a> ' . 
                                __('for translation bulk actions for Avada Elements.', 'tmy-globalization');
             ?>
@@ -3191,6 +3286,7 @@ error_log("return rows: " . json_encode($q_rows));
                          <br>
 	        </div>
             <?php 
+                }
             }
 
 	    if( ! empty( $_REQUEST[ 'start_sync_tranlations' ] ) ) {
@@ -3211,8 +3307,23 @@ error_log("return rows: " . json_encode($q_rows));
 	        //$redirect_to = remove_query_arg( 'start_sync_tranlations' );
 		//return $redirect_to;
 	    }
+            if( ! empty( $_REQUEST[ 'apply_html_translations' ] ) ) {
+                ?>
+                            <div class="updated notice is-dismissible">
+                                    <?php echo $_REQUEST['apply_html_translations'] ?>
+                            </div>
+                <?php
+                //$redirect_to = remove_query_arg( 'start_sync_tranlations' );
+                //return $redirect_to;
+            }
+
         }
         function tmy_plugin_g11n_admin_head() {
+
+            global $post, $title, $action, $current_screen;
+            if( isset( $current_screen->post_type ) && $current_screen->post_type == 'g11n_translation' && $action == 'edit' ) {
+                $title = 'Edit Translation';
+            }
 
             echo '<style type="text/css">
                      .column-translation_started { text-align: left; width:100px !important; overflow:hidden }
@@ -3730,6 +3841,7 @@ return;
                         }
                         //$this->tmy_plugin_g11n_update_htaccess($current_seo_option, $current_translate_slug);
                         $this->g11n_create_rewrite_rule();
+                        flush_rewrite_rules();
 
                         if ($update_ret) {
                             $return_message .= "Rules Saved!";

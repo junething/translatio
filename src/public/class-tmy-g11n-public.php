@@ -571,6 +571,7 @@ public function g11n_add_floating_menu() {
         }
 	public function g11n_locale_filter($locale_in) {
 
+//error_log("== g11n_locale_filter " . $locale_in . " " . is_admin());
                 if ( is_admin() || defined( 'REST_REQUEST' ) && REST_REQUEST ) {
                     return $locale_in; 
                 }
@@ -633,8 +634,9 @@ public function g11n_add_floating_menu() {
 	        //    return $locale_in;
 		//}
 
+error_log("== g11n_locale_filter calling get_perfered_language" . $locale_in );
 		$pre_lang = $this->translator->get_preferred_language();
-          error_log("g11n_locale_filter calling get_preferred_language: " . $pref_lang);
+error_log("== g11n_locale_filter calling get_preferred_language return " . $pref_lang);
 		if (array_key_exists($pre_lang, $language_options)) {
 		    return $language_options[$pre_lang];
 		} else {
@@ -659,7 +661,7 @@ public function g11n_add_floating_menu() {
 		      //'show_in_menu' => 'admin.php?page=tmy-g11n-setup-menu',
 		      //'show_in_menu' => 'edit.php?post_type=g11n_translation',
                       'show_in_rest' => true,
-                      'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+                      'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments', 'revisions' ),
                       'capabilities' => array(
                           'create_posts' => 'do_not_allow', 
                        // Removes support for the "Add New" function ( use 'do_not_allow' instead of false for multisite set ups )
@@ -2148,8 +2150,7 @@ error_log("exit template direct");
                             $object_var = array();
                         }
                         $sentencelist = $_POST['sentencelist'];
-                        //error_log("tmy_ops_save_translation sentencelist: " . count($sentencelist));
-                        //error_log("tmy_ops_save_translation object_var: " . count($object_var));
+                        error_log("tmy_ops_save_translation sentencelist: " . count($sentencelist));
                         //if (! is_array($object_var)) { $object_var = array(); }
                         $text_lang = esc_sql($_POST['language']);
                         $referenceid = esc_sql($_POST['referenceid']);
@@ -2160,7 +2161,63 @@ error_log("exit template direct");
                         } else {
                             $lang_code = $text_lang;
                         }
+                        error_log("tmy_ops_save_translation refID $referenceid, lang_code: " . $lang_code);
                       
+                        $valid_trans_pattern = array();
+                        $valid_trans_replacement = array();
+                        foreach ($object_var as $orig => $value) {
+                            if ($orig !== $value) {
+                                //$valid_trans_pattern[] = "/" . preg_quote($orig, '/') . "/u";
+                                $valid_trans_pattern[] = "/" . preg_quote($orig, '/') . "/";
+                                $valid_trans_replacement[$orig] = $value;
+                            }
+                        }
+                        //error_log("LINES: " . print_r($valid_trans_pattern, true));
+                        //error_log("LINES: " . print_r($valid_trans_replacement, true));
+
+                        $translation_id = $this->translator->get_translation_id($referenceid, $lang_code, get_post_type($referenceid));
+                        if (isset($translation_id)) {
+                            error_log("find translation id " . $translation_id);
+                            $dep_list = array();
+                            $dep_queue = array();
+                            $dep_queue[] = $translation_id;
+                            while (count($dep_queue) > 0) {
+                                $dep_post_id = array_shift($dep_queue);
+                                $dep_post_content = get_post_field('post_content', $dep_post_id);
+                                $dep_post_id_need_update = false;
+                                $dep_post_content =
+                                    preg_replace_callback($valid_trans_pattern, function ($matches) use (&$match_count,
+                                                                                                         &$valid_trans_replacement,
+                                                                                                         &$dep_post_id_need_update,
+                                                                                                         &$object_var,
+                                                                                                         &$dep_post_id) {
+                                    $dep_post_id_need_update = true;
+                                    $match_count = $match_count + 1;
+                                    unset($object_var[$matches[0]]);
+                                    return $valid_trans_replacement[$matches[0]];
+                                }, $dep_post_content);
+    
+                                $pattern = "/fusion_global id=\"([^\]]*)\"/";
+                                preg_match_all($pattern, $dep_post_content, $dep_matches);
+                                foreach ($dep_matches[1] as $global_id) {
+                                    if (! in_array($global_id, $dep_queue)) {
+                                        $dep_queue[] = $global_id;
+                                    }
+                                }
+                                $dep_list[] = $dep_post_id;
+                                if ($dep_post_id_need_update) {
+                                    error_log("[" . $dep_post_id . "] needs update");
+                                    $post_data = array(
+                                        'ID'           => $dep_post_id,
+                                        'post_content' => $dep_post_content,
+                                    );
+                                    wp_update_post($post_data);
+                                }
+                            }
+                        } else {
+                            error_log("could not find translation id");
+                        }
+
                         $holder_id = 0;
                         $page_place_holder_title = $referenceid . "-page-translation";
                         $sql = "select ID from {$wpdb->prefix}posts where post_title=\"" . esc_sql($page_place_holder_title) . "\" and post_status=\"private\"";

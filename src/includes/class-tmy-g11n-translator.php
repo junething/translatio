@@ -243,10 +243,11 @@ class TMY_G11n_Translator {
                         'body' => $payload_string,
                         'timeout' => 10
                     );
+                    //error_log("pushing url: " . $rest_url);
                     $response = wp_remote_post( $rest_url, $args );
-
                     if ( is_array( $response ) && ! is_wp_error( $response ) ) {
                         $output = $response['body'];
+                        $output = trim($output, '"');
                         $payload = json_decode($output);
                     } else {
                         error_log("In push_contents_to_translation_server, Error: " . esc_attr($response->get_error_message()));
@@ -268,10 +269,11 @@ class TMY_G11n_Translator {
 		    //$return_msg .= "  id : " . get_the_ID();
 		    $return_msg .= "  id : " . $default_post_id;
     
-		    //error_log("Server Push: " . $return_msg);
+                    //error_log("Server Push: " . $return_msg);
 		    update_post_meta( $default_post_id, 'translation_push_status', $return_msg);
 
 		    curl_close($ch);
+                    //error_log("return output: " . $output);
                     return $output;
             }
 	}
@@ -713,19 +715,15 @@ class TMY_G11n_Translator {
                 if (is_admin()) {
                     return get_option('g11n_default_lang');
                 }
-
                 $all_configed_langs = get_option('g11n_additional_lang'); /* array format ((English -> en), ...) */
                 if (is_array($all_configed_langs) && (count($all_configed_langs) > 0)) {
-         //error_log("GET LANG - if wp_query is ready: " . isset($GLOBALS['wp_query']));
-
                     if (isset($GLOBALS['wp_query'])) {
+                        //error_log("GET LANG - if wp_query is ready");
 		        $lang_var_code_from_query = filter_input(INPUT_GET, 'g11n_tmy_lang_code', FILTER_SANITIZE_SPECIAL_CHARS);
 		        //$lang_var_code_from_query = get_query_var("g11n_tmy_lang_code", "");
-         //error_log("GET LANG -  wp_query is ready: input_get " . $lang_input_get . " qvar: " . $lang_var_code_from_query);
                         if (! empty($lang_var_code_from_query)) {
                             $url_lang_code = str_replace('-', '_', $lang_var_code_from_query);
                             $url_lang_name = array_search(strtolower($url_lang_code), array_map('strtolower',$all_configed_langs));
-             //error_log("GET LANG - g11n_tmy_lang_code " . $url_lang_code);
                         } else {
                             $langs_pattern = '/\/(' . implode('|', array_values($all_configed_langs)) . ')(\/.*)?$/';
                             $langs_pattern = strtolower(str_replace('_', '-', $langs_pattern));
@@ -733,49 +731,38 @@ class TMY_G11n_Translator {
                             if (preg_match($langs_pattern, $request_uri, $matches)) {
                                 $url_lang_code = str_replace('-', '_', $matches[1]);
                                 $url_lang_name = array_search(strtolower($url_lang_code), array_map('strtolower',$all_configed_langs));
-             //error_log("GET LANG - uri " . $url_lang_code . " " . $url_lang_name);
                             } else {
                                 $lang_var_from_query = filter_input(INPUT_GET, 'g11n_tmy_lang', FILTER_SANITIZE_SPECIAL_CHARS);
                                 if (! empty($lang_var_from_query)) {
                                     $url_lang_name = $lang_var_from_query;
                                     $url_lang_code = $all_configed_langs[$url_lang_name];
-             //error_log("GET LANG - g11n_tmy_lang " . $url_lang_code . " " . $url_lang_name);
                                 } else {
                                     $url_lang_name = "";
                                     $url_lang_code = "";
-             //error_log("GET LANG - g11n_tmy_lang no -" . $url_lang_code . " " . $url_lang_name);
                                 }
                             }
                         }
                     } else {
+                        //error_log("GET LANG - if wp_query is not ready");
                         $langs_pattern = '/\/(' . implode('|', array_values($all_configed_langs)) . ')(\/.*)?$/';
                         $langs_pattern = strtolower(str_replace('_', '-', $langs_pattern));
                         $request_uri = sanitize_url($_SERVER['REQUEST_URI']);
                         if (preg_match($langs_pattern, $request_uri, $matches)) {
                             $url_lang_code = str_replace('-', '_', $matches[1]);
                             $url_lang_name = array_search(strtolower($url_lang_code), array_map('strtolower',$all_configed_langs));
-             //error_log("GET LANG - uri " . $url_lang_code . " " . $url_lang_name);
                         } else {
-                                    $url_lang_name = "";
-                                    $url_lang_code = "";
-             //error_log("GET LANG - can't get anything set null ");
-
-
+                            $url_lang_name = "";
+                            $url_lang_code = "";
                         }
                     }
-
-
-
-
-
-                } else {
-         //error_log("GET LANG - return g11n_default_lang ");
+                    //error_log("GET LANG -  " . $url_lang_code . " " . $url_lang_name);
+                } else { //no additional langs configured
                     return get_option('g11n_default_lang');
                 }
 
                 if (session_status() !== PHP_SESSION_ACTIVE) {
-                    if (! session_start()) {
-                        error_log("GET LANG: start session failed");
+                    if (! @session_start()) {
+                        //error_log("GET LANG: start session failed");
                         if (empty($url_lang_name)) {
                             return get_option('g11n_default_lang');
                         } else {

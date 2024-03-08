@@ -174,8 +174,8 @@
             // Create a hin box with "Click to edit" message
             const hint = $('<div class="hint"><button id="clickableButton" style="padding: 1;">' +
                          '<img id="iconImage" src="' +
-                         tmy_g11n_ajax_obj.img_url + '/icons/translation-icon.svg" alt="Translation" style="width: 23px; height: 23px;">' +
-                         '</button></div>');
+                         tmy_g11n_ajax_obj.img_url + '/icons/t2.svg" alt="Translatio" style="width: 23px; height: 23px;">' +
+                         'Edit Translation</button></div>');
  
             // Position the hint box relative to the mouse pointer
             const iframeId = $(this).attr('iframeid');
@@ -219,25 +219,33 @@
 
             var contentLanguage = $('meta[http-equiv="content-language"]').attr('content');
             var referenceId = $('meta[http-equiv="translatio-tmy-ref-id"]').attr('content');
-
-            //console.log("save page translation " + referenceId + " sentencelist leno=" + sentencelist.length);
-
+            console.log("save page translation " + referenceId + " sentencelist leno=" + sentencelist.length);
             var table_saving = {};
             for (var i = 0; i < sentencelist.length; i++) {
+                //console.log("input: -> " + i);
                 var inputId = 'input_' + i;
                 var transId = 'trans_' + i;
                 var inputValue = $('#' + inputId).val();
                 var transValue = $('#' + transId).val();
                 if (transValue.trim() !== "") {
                     table_saving[inputValue] = transValue;
+                    console.log("trans changed " + inputValue + "->" + transValue.trim());
+                    findAndUpdateTextNodes(document.body, inputValue, transValue.trim());
+                    findAndUpdateTextNodesIframe(document.body, inputValue, transValue.trim());
                 } 
+                //console.log("input:" + inputValue + " transValue: " + transValue + "translationTable: " + translationTable[inputValue]);
+                /*
                 if (translationTable[inputValue] !== transValue.trim()) {
                     //console.log("trans changed " + translationTable[inputValue] + "->" + transValue.trim());
-                    findAndUpdateTextNodes(document.body, translationTable[inputValue], transValue.trim());
-                    findAndUpdateTextNodesIframe(document.body, translationTable[inputValue], transValue.trim());
+                    //findAndUpdateTextNodes(document.body, translationTable[inputValue], transValue.trim());
+                    //findAndUpdateTextNodesIframe(document.body, translationTable[inputValue], transValue.trim());
+                    console.log("trans changed " + inputValue + "->" + transValue.trim());
+                    findAndUpdateTextNodes(document.body, inputValue, transValue.trim());
+                    findAndUpdateTextNodesIframe(document.body, inputValue, transValue.trim());
                 }
+                */
             }
-            //console.log("table_saving len =" + Object.keys(table_saving).length);
+            console.log("table_saving len =" + Object.keys(table_saving).length);
             //console.log('table_saving obj: ' + JSON.stringify(table_saving));
 
             var data = {
@@ -248,9 +256,26 @@
                 'sentencelist': sentencelist,
                 'obj': table_saving
             };
+
+            /***
+            $.ajax({
+                url:     "http://localhost:3000/documents",
+                method: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    console.log('Response:', response);
+                },
+                error: function(xhr, status, error) {
+                  console.log("Error message:", xhr.responseJSON);
+                }
+            });
+            ***/
+
             $.ajax({
                 type:    "POST",
-                async:   false,
+                //async:   false,
                 url:     tmy_g11n_ajax_obj.ajax_url,
                 data:    data,
                 success: function(response) {
@@ -266,7 +291,6 @@
                     $('.table-status').text("error");
                 }
             });
-
 
         }
 
@@ -369,6 +393,13 @@
             var referenceId = $('meta[http-equiv="translatio-tmy-ref-id"]').attr('content');
             //console.log("Start translation on: " + textValue + " " + referenceId);
 
+            var defaultLanguageRemainder = "";
+            if (isDefaultLanguage) {
+                defaultLanguageRemainder = " (Default Language, Read Only)";
+            } else {
+                defaultLanguageRemainder = " (Type the translation in the editor box)";
+            }
+
             var origText = Object.keys(translationTable).find(key => translationTable[key] === textValue) ?? textValue;
         
             var lang_code = contentLanguage.replace(/-/g, '_').toUpperCase();
@@ -378,12 +409,13 @@
                 '<div class="popup-box">' +
                   '<p><b>' + origText + '</b></p>' +
                   '<p><img src="' + tmy_g11n_ajax_obj.img_url + '/flags/24/' + lang_code + '.png" title="' +  lang_code +'" alt="' + lang_code + "\" > " + lang_code +
+                  '<p>' + defaultLanguageRemainder +
                   '<div id="tmy-translation-table"></div>' +
                   '<br>' +
                   '<div class="button-container">' +
-                    '<button class="save-translation-button">Start or Sync Translation</button> ' +
-                    '<div class="table-status"><div class="tmy_loader"></div>checking status...</div>' +
-                    '<button class="close-button">Close</button>' +
+                    '<button class="save-translation-button">Save&Publish </button><span style="font-size: smaller;">(Previous translations saved as revisions. Edits to global containers impact all pages)</span> ' +
+             //       '<div class="table-status"><div class="tmy_loader"></div>checking status...</div>' +
+                    '<button class="close-button">Cancel</button>' +
                   '</div>' +
                 '</div>' +
               '</div>'
@@ -464,10 +496,10 @@
                 '<p>Ref: ' + referenceId + '</p>' +
                 '<p><div id="tmy-translation-table"></div></p>' +
                 '<p><br></p>' +
-                '<button class="send-page-translation-button">Start or Sync Translation</button> ' +
+                '<button class="send-page-translation-button">Save&Publish</button> <span style="font-size: smaller;">(Previous translations saved as revisions. Edits to global containers impact all pages)</span>' +
                 //'<div class="table-status"><div class="tmy_loader"></div>checking status...</div>' +
                 '<div class="table-status"></div>' +
-                '<button class="close-button">Close</button>' +
+                '<button class="close-button">Cancel</button>' +
                 '</div>' +
                 '</div>'
             );
@@ -489,26 +521,28 @@
                 top: topPosition
             });
 
-            var table = $('<table id="tmy-translation-table">');
+            var table = $('<table id="tmy-translation-table"> <thead><tr><th></th><th>Current Translation</th><th>Type New Translation</th></tr></thead>');
             //$.each(sentencelist, function(index, sentence) {
             for (var i = 0; i < sentencelist.length; i++) {
                 var row = $('<tr>');
                 var languageCell = $('<td>').text(i);
                 row.append(languageCell);
 
-                var inputField = $('<input type="text" value="' + sentencelist[i] + '">');
+                //var inputField = $('<input type="text" value="' + sentencelist[i] + '">');
+                var inputField = $('<textarea>' + sentencelist[i] + '</textarea>');
                 inputField.attr('id', 'input_' + i); // Use a unique ID for each input
-                inputField.attr('size', 30);
+                inputField.attr('cols', 35);
+                //inputField.attr('size', 40);
                 inputField.addClass('TmyInputClass');
-                if (isDefaultLanguage) {
+                //if (isDefaultLanguage) {
                     inputField.attr('readonly', true);
-                }
+                //}
 
                 var transField = $('<input type="text" value="' + 
                                     (translationTable?.[sentencelist[i]] ?? '')
                                     + '">');
                 transField.attr('id', 'trans_' + i); // Use a unique ID for each input
-                transField.attr('size', 30);
+                transField.attr('size', 40);
                 transField.addClass('TmyInputClass');
                 if (isDefaultLanguage) {
                     transField.attr('readonly', true);
@@ -544,10 +578,11 @@
         var isDefaultLanguage;
         var sentencelist = [];
         var logo_popup = $('<div class="translatio-logo-popup">' +
+                            '<div style="display: flex; align-items:center;">' +
                             '<img id="iconImage" src="' +
-                            tmy_g11n_ajax_obj.img_url + '/icons/t1.svg" alt="Translatio" style="width: 32px; height: 32px;">' +
-                            'Translatio HTML Translator<br><br>' +
-                           '<button id="start-page-translation-button" class="start-page-translation-button">Start Entire Page</button></div>');
+                            tmy_g11n_ajax_obj.img_url + '/icons/t1.svg" alt="Translatio" style="width: 145px;">' +
+                            '</div><br>' +
+                           '<button id="start-page-translation-button" class="start-page-translation-button">Edit Page Translation</button></div>');
         logo_popup.css('background-color', 'rgba(255, 255, 255, 0.8)'); // Adjust the values as needed
         $('body').append(logo_popup);
         logo_popup.fadeIn();

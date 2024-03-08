@@ -14,7 +14,7 @@
     border: none; /* Solid border */
     color: #333; /* Text color */
     padding: 0;
-    border-radius: 2px;
+    border-radius: 20px;
     z-index: 9999; /* Ensure it's above other elements */
   }
   .bordered-cell {
@@ -80,7 +80,8 @@
   }
 
   .close-button {
-    background-color: #49e;
+    //background-color: #49e;
+    background-color: #C8C8C8;
     color: #fff;
     margin-top: 10px; /* Adjust the margin as needed */
     align-self: flex-end; /* Align the button to the bottom of the container */
