@@ -162,7 +162,7 @@ class TMY_G11n_Public {
                 }
                 //a:2:{s:5:"zh-cn";a:2:{s:3:"url";a:1:{i:0;s:8:"/关于/";}s:8:"url_orig";a:1:{i:0;s:7:"/about/";}}
                 //     s:5:"pt-br";a:2:{s:3:"url";a:1:{i:0;s:7:"/sobre/";}s:8:"url_orig";a:1:{i:0;s:7:"/about/";}}}
-
+/*
                 $parsedUrl = parse_url($url);
                 $fragment = isset($parsedUrl['fragment']) ? '#' . $parsedUrl['fragment'] : '';
                 if (isset($parsedUrl['scheme'])) {
@@ -174,6 +174,30 @@ class TMY_G11n_Public {
                         $baseUrl = isset($parsedUrl['path']) ? $parsedUrl['path'] : '';
                     }
                 }
+*/
+                $parsedUrl = parse_url($url);
+                $fragment = isset($parsedUrl['fragment']) ? '#' . $parsedUrl['fragment'] : '';
+                if (isset($parsedUrl['scheme'])) {
+                    $baseUrl = $parsedUrl['scheme'] . '://';
+                    if (isset($parsedUrl['host'])) {
+                        $baseUrl .= $parsedUrl['host'];
+                        if (isset($parsedUrl['port'])) {
+                            $baseUrl .= ':' . $parsedUrl['port'];
+                        }
+                    }
+                    $baseUrl .= isset($parsedUrl['path']) ? $parsedUrl['path'] : '';
+                } else {
+                    if (isset($parsedUrl['host'])) {
+                        $baseUrl = $parsedUrl['host'];
+                        if (isset($parsedUrl['port'])) {
+                            $baseUrl .= ':' . $parsedUrl['port'];
+                        }
+                        $baseUrl .= isset($parsedUrl['path']) ? $parsedUrl['path'] : '';
+                    } else {
+                        $baseUrl = isset($parsedUrl['path']) ? $parsedUrl['path'] : '';
+                    }
+                }
+
 
                 if (is_array($slugs_confs)) {
                     if (array_key_exists($to_lan, $slugs_confs)) {
@@ -1720,7 +1744,6 @@ error_log("exit template direct");
             foreach ($sorted_menu_items as $menu_index => &$menu_item) {
 
 //error_log("MENU ITEM:  " . $menu_item->url);
-
                 $current_url = sanitize_url($_SERVER['REQUEST_URI']);
                 $site_url = get_site_url();
                 $current_url_arr = wp_parse_url($current_url);
