@@ -1,4 +1,15 @@
-# About
+# Translatio
+![GitHub Release](https://img.shields.io/github/v/release/translatio-io/translatio)
+![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/tmy-globalization)
+![GitHub License](https://img.shields.io/github/license/translatio-io/translatio)
+![WordPress Plugin: Required WP Version](https://img.shields.io/wordpress/plugin/wp-version/tmy-globalization)
+![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/tmy-globalization)
+![Static Badge](https://img.shields.io/badge/langauges-all-blue)
+
+
+
+
+
 This is the repo for [Translatio](https://www.translatio.io/), an open source tool for internationalization and localization of WordPress based websites.
 With Translatio you can
 - Talk to your customers in their language.
