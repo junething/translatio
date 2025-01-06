@@ -1,3 +1,32 @@
+# About
+This is the repo for [Translatio](https://www.translatio.io/), an open source tool for internationalization and localization of WordPress based websites.
+With Translatio you can
+- Talk to your customers in their language.
+- Localize your WordPress website to new markets.
+
+# Features
+* Live translation powered by Google Translate
+* Full cycle to keep translation locally for proof read, edit and publish
+* Support for the new block Gutenberg editor and classic editor
+* Support for Google Translate integration with editing capability
+* Language switcher options include:
+  * Draggable floating menu
+  * Sidebar widget
+  * Along with title or description
+  * With any page or post
+* Display the language switcher in using the language name or country flag
+* Auto-detect a visitors browser language setting and display your site in their language (if it is available, otherwise will display the site in the default language)
+* Support for browser cookie settings
+* Premium service available that provides you a professional translation editor and workflow, that syncs all translations back to your WordPress instance
+* Live support community
+
+# Instalation
+## Wordpress Plugin Store
+
+## Git
+
+## Manual
+
 # Translatio plugin for WordPress Getting Started & FAQ
 
 ----
@@ -14,20 +43,6 @@ Full professional workflow provides more control and higher translation quality,
 Translatio provides multiple ways to handle different development phases of your WordPress website, with intuitive and easy to use interfaces. 
 Some features include:
 
-* Live translation powered by Google Translate
-* Full cycle to keep translation locally for proof read, edit and publish
-* Support for the new block Gutenberg editor and classic editor
-* Support for Google Translate integration with editing capability
-* Language switcher options include:
-  * Draggable floating menu
-  * Sidebar widget
-  * Along with title or description
-  * With any page or post
-* Display the language switcher in using the language name or country flag
-* Auto-detect a visitors browser language setting and display your site in their language (if it is available, otherwise will display the site in the default language)
-* Support for browser cookie settings
-* Premium service available that provides you a professional translation editor and workflow, that syncs all translations back to your WordPress instance
-* Live support community
 
 ----
 
