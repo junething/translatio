@@ -26,7 +26,7 @@ Search for "Translatio" in the WordPress plugin directory and install it.
 ## Git
 ```sh
 git clone https://github.com/translatio-io/translatio
-``
+```
 ## Manual
 Download the Translatio zip file from https://github.com/translatio-io/translatio/releases, e.g. translatio-globalization-1.0.0.zip
 Upload to wordpress
