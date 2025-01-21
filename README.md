@@ -33,7 +33,7 @@ Translatio provides multiple ways to handle different development phases of your
   * Along with title or description
   * With any page or post
 * Display the language switcher in using the language name or country flag
-* Auto-detect a visitors browser language setting and display your site in their language (if it is available, otherwise will display the site in the default language)
+* Auto-detect a visitor's browser language setting and display your site in their language (if it is available, otherwise will display the site in the default language)
 * Support for browser cookie settings
 * Premium service available that provides you a professional translation editor and workflow, that syncs all translations back to your WordPress instance
 * Live support community
@@ -46,7 +46,7 @@ Search for "Translatio" in the WordPress plugin directory and install it.
 Download the Translatio zip file from [releases](https://github.com/translatio-io/translatio/releases), and upload on the plugin page in your Wordpress admin panel.
 
 # Next Steps
-Head over to the [Wiki](https://github.com/junething/translatio/wiki) for full setup and use insttructions and expand your audience!
+Head over to the [Wiki](https://github.com/junething/translatio/wiki) for full setup and use instructions and expand your audience!
 
 ## Getting More Support
 
